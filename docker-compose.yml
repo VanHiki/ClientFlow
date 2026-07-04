@@ -1,0 +1,42 @@
+name: clientflow-saas
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: clientflow-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-clientflow}
+      MYSQL_USER: ${MYSQL_USER:-clientflow}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-clientflow}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      TZ: Asia/Ho_Chi_Minh
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - clientflow_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    container_name: clientflow-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      DB_URL: "jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-clientflow}?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh"
+      DB_USERNAME: ${MYSQL_USER:-clientflow}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-clientflow}
+      JPA_DDL_AUTO: ${JPA_DDL_AUTO:-update}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+
+volumes:
+  clientflow_mysql_data:

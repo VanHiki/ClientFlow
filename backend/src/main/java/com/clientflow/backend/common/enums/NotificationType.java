@@ -1,0 +1,10 @@
+package com.clientflow.backend.common.enums;
+
+public enum NotificationType {
+    APPOINTMENT_CREATED,
+    APPOINTMENT_CONFIRMED,
+    APPOINTMENT_CANCELLED,
+    APPOINTMENT_COMPLETED,
+    APPOINTMENT_REMINDER,
+    PASSWORD_RESET_REQUESTED
+}
