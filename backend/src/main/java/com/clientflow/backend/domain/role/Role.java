@@ -4,16 +4,14 @@ package com.clientflow.backend.domain.role;
 import com.clientflow.backend.common.entity.BaseEntity;
 import com.clientflow.backend.common.enums.RoleName;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "roles")
 public class Role extends BaseEntity {
     @Id

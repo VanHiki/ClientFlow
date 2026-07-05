@@ -4,16 +4,14 @@ package com.clientflow.backend.domain.user;
 import com.clientflow.backend.common.entity.BaseEntity;
 import com.clientflow.backend.domain.role.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_role_id", columnList = "role_id") // index theo role_id
 }
