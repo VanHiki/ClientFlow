@@ -1,6 +1,7 @@
 package com.clientflow.backend.auth;
 
 import com.clientflow.backend.auth.dto.AuthResponse;
+import com.clientflow.backend.auth.dto.LoginRequest;
 import com.clientflow.backend.auth.dto.RegisterRequest;
 import com.clientflow.backend.common.response.ApiResponse;
 import jakarta.validation.Valid;
@@ -23,6 +24,15 @@ public class AuthController {
     public ApiResponse<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ApiResponse.<AuthResponse>builder()
                 .result(authService.register(request))
+                .message("Register successfully")
+                .build();
+    }
+
+    @PostMapping("/login")
+    public ApiResponse<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return ApiResponse.<AuthResponse>builder()
+                .result(authService.login(request))
+                .message("Login successfully")
                 .build();
     }
 }
