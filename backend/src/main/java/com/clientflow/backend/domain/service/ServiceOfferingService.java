@@ -2,16 +2,20 @@ package com.clientflow.backend.domain.service;
 
 import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
+import com.clientflow.backend.common.response.PageResponse;
 import com.clientflow.backend.domain.business.Business;
 import com.clientflow.backend.domain.business.BusinessRepository;
 import com.clientflow.backend.domain.service.dto.ServiceCreateRequest;
 import com.clientflow.backend.domain.service.dto.ServiceResponse;
 import com.clientflow.backend.domain.service.mapper.ServiceOfferingMapper;
 import com.clientflow.backend.security.SecurityUtil;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +29,9 @@ public class ServiceOfferingService {
     ServiceOfferingMapper serviceOfferingMapper;
 
 
-    public ServiceResponse createService(ServiceCreateRequest request) {
-        Business business = getCurrentOwnerBusiness();
+    @Transactional
+    public ServiceResponse createService(Long businessId, ServiceCreateRequest request) {
+        Business business = getCurrentOwnerBusiness(businessId);
 
         String name = request.name().trim();
 
@@ -43,10 +48,20 @@ public class ServiceOfferingService {
         return serviceOfferingMapper.toResponse(serviceOfferingRepository.save(serviceOffering));
     }
 
-    private Business getCurrentOwnerBusiness() {
+    @Transactional(readOnly = true)
+    public PageResponse<ServiceResponse> getServices(Long businessId, Pageable pageable) {
+        Business business = getCurrentOwnerBusiness(businessId);
+
+        return PageResponse.from(
+                serviceOfferingRepository.findByBusinessId(business.getId(), pageable)
+                        .map(serviceOfferingMapper::toResponse)
+        );
+    }
+
+    private Business getCurrentOwnerBusiness(Long businessId) {
         Long ownerId = securityUtil.getCurrentUserId();
 
-        return businessRepository.findByOwnerId(ownerId)
+        return businessRepository.findByIdAndOwnerId(businessId, ownerId)
                 .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
     }
 

@@ -16,7 +16,6 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     BUSINESS_SLUG_ALREADY_EXISTS(1007, "Business slug already exists", HttpStatus.CONFLICT),
     BUSINESS_NOT_FOUND(1008, "Business not found", HttpStatus.NOT_FOUND),
-    OWNER_ALREADY_HAS_BUSINESS(1009, "Owner already has a business", HttpStatus.CONFLICT),
     SERVICE_NOT_FOUND(1010, "Service not found", HttpStatus.NOT_FOUND),
     SERVICE_NAME_ALREADY_EXISTS(1011, "Service name already exists", HttpStatus.CONFLICT),
     INVALID_SERVICE_PRICE(1012, "Service price must not be negative", HttpStatus.BAD_REQUEST),

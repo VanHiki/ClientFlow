@@ -7,10 +7,13 @@ import com.clientflow.backend.domain.business.dto.BusinessResponse;
 import com.clientflow.backend.domain.business.mapper.BusinessMapper;
 import com.clientflow.backend.domain.user.User;
 import com.clientflow.backend.security.SecurityUtil;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.clientflow.backend.common.response.PageResponse;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -24,10 +27,6 @@ public class BusinessService {
     public BusinessResponse createBusiness(BusinessCreateRequest request) {
         User owner = securityUtil.getCurrentUser();
         String slug = normalizeSlug(request.slug());
-
-        if (businessRepository.findByOwnerId(owner.getId()).isPresent()) {
-            throw new AppException(ErrorCode.OWNER_ALREADY_HAS_BUSINESS);
-        }
 
         if (businessRepository.existsBySlug(slug)) {
             throw new AppException(ErrorCode.BUSINESS_SLUG_ALREADY_EXISTS);
@@ -46,9 +45,19 @@ public class BusinessService {
     }
 
     @Transactional(readOnly = true)
-    public BusinessResponse getMyBusiness() {
+    public PageResponse<BusinessResponse> getMyBusinesses(Pageable pageable) {
         Long ownerId = securityUtil.getCurrentUserId();
-        Business business = businessRepository.findByOwnerId(ownerId)
+
+        return PageResponse.from(
+                businessRepository.findByOwnerId(ownerId, pageable)
+                        .map(businessMapper::toResponse)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public BusinessResponse getMyBusiness(Long businessId) {
+        Long ownerId = securityUtil.getCurrentUserId();
+        Business business = businessRepository.findByIdAndOwnerId(businessId, ownerId)
                 .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
 
         return businessMapper.toResponse(business);

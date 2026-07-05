@@ -1,5 +1,7 @@
 package com.clientflow.backend.domain.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,8 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering, Long> {
 
-    List<ServiceOffering> findByBusinessIdOrderByCreatedAtDesc(Long businessId);
-
+    Page<ServiceOffering> findByBusinessId(Long businessId, Pageable pageable);
     Optional<ServiceOffering> findByIdAndBusinessId(Long id, Long businessId);
 
     boolean existsByBusinessIdAndNameIgnoreCase(Long businessId, String name);
