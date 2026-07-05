@@ -7,7 +7,6 @@ import com.clientflow.backend.domain.business.dto.BusinessResponse;
 import com.clientflow.backend.domain.business.mapper.BusinessMapper;
 import com.clientflow.backend.domain.user.User;
 import com.clientflow.backend.security.SecurityUtil;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
