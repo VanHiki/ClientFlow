@@ -69,6 +69,8 @@ public class ServiceOfferingService {
             return null;
         }
 
+
+
         return value.trim();
     }
 }
