@@ -20,8 +20,9 @@ public enum ErrorCode {
     SERVICE_NAME_ALREADY_EXISTS(1011, "Service name already exists", HttpStatus.CONFLICT),
     INVALID_SERVICE_PRICE(1012, "Service price must not be negative", HttpStatus.BAD_REQUEST),
     INVALID_SERVICE_DURATION(1013, "Service duration must be greater than zero", HttpStatus.BAD_REQUEST),
-    STAFF_EMAIL_ALREADY_EXISTS(1014, "Staff email already exists in this business", HttpStatus.CONFLICT);
-
+    STAFF_EMAIL_ALREADY_EXISTS(1014, "Staff email already exists in this business", HttpStatus.CONFLICT),
+    STAFF_NOT_FOUND(1015, "Staff not found", HttpStatus.NOT_FOUND),
+    STAFF_SERVICE_ALREADY_ASSIGNED(1016, "Staff already assigned to this service", HttpStatus.CONFLICT);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;
