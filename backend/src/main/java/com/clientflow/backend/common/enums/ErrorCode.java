@@ -24,7 +24,10 @@ public enum ErrorCode {
     STAFF_NOT_FOUND(1015, "Staff not found", HttpStatus.NOT_FOUND),
     STAFF_SERVICE_ALREADY_ASSIGNED(1016, "Staff already assigned to this service", HttpStatus.CONFLICT),
     INVALID_WORKING_HOUR_RANGE(1017, "Working hour start time must be before end time", HttpStatus.BAD_REQUEST),
-    WORKING_HOUR_OVERLAP(1018, "Working hour overlaps with existing working hour", HttpStatus.CONFLICT);
+    WORKING_HOUR_OVERLAP(1018, "Working hour overlaps with existing working hour", HttpStatus.CONFLICT),
+    CUSTOMER_NOT_FOUND(1019, "Customer not found", HttpStatus.NOT_FOUND),
+    CUSTOMER_PHONE_ALREADY_EXISTS(1020, "Customer phone already exists in this business", HttpStatus.CONFLICT),
+    CUSTOMER_EMAIL_ALREADY_EXISTS(1021, "Customer email already exists in this business", HttpStatus.CONFLICT);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;
