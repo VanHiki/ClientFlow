@@ -1,12 +1,16 @@
 package com.clientflow.backend.domain.publicbooking;
 
 import com.clientflow.backend.common.response.ApiResponse;
+import com.clientflow.backend.domain.appointment.dto.AppointmentResponse;
 import com.clientflow.backend.domain.availability.AvailabilityService;
 import com.clientflow.backend.domain.availability.dto.AvailableSlotResponse;
+import com.clientflow.backend.domain.publicbooking.dto.PublicAppointmentCreateRequest;
 import com.clientflow.backend.domain.publicbooking.dto.PublicBusinessResponse;
 import com.clientflow.backend.domain.publicbooking.dto.PublicServiceResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -44,6 +48,18 @@ public class PublicBookingController {
         return ApiResponse.<List<AvailableSlotResponse>>builder()
                 .message("Get public available slots successfully")
                 .result(availabilityService.getPublicAvailableSlots(slug, serviceId, date))
+                .build();
+    }
+
+    @PostMapping("/appointments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ApiResponse<AppointmentResponse> createAppointment(
+            @PathVariable String slug,
+            @Valid @RequestBody PublicAppointmentCreateRequest request
+    ) {
+        return ApiResponse.<AppointmentResponse>builder()
+                .message("Appointment booked successfully")
+                .result(publicBookingService.createAppointment(slug, request))
                 .build();
     }
 }
