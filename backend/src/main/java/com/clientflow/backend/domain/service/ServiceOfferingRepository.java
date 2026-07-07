@@ -13,6 +13,6 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
 
     Page<ServiceOffering> findByBusinessId(Long businessId, Pageable pageable);
     Optional<ServiceOffering> findByIdAndBusinessId(Long id, Long businessId);
-
+    List<ServiceOffering> findByBusinessIdAndActiveTrueOrderByCreatedAtDesc(Long businessId);
     boolean existsByBusinessIdAndNameIgnoreCase(Long businessId, String name);
 }

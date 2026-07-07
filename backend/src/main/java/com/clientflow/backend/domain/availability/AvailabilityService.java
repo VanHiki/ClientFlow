@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,6 +49,25 @@ public class AvailabilityService {
     );
 
     @Transactional(readOnly = true)
+    public List<AvailableSlotResponse> getPublicAvailableSlots(String slug, Long serviceId, LocalDate date) {
+        Business business = businessRepository.findBySlug(slug)
+                .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
+
+        if (!business.isActive()) {
+            throw new AppException(ErrorCode.BUSINESS_NOT_FOUND);
+        }
+
+        ServiceOffering service = serviceOfferingRepository.findByIdAndBusinessId(serviceId, business.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SERVICE_NOT_FOUND));
+
+        if (!service.isActive()) {
+            throw new AppException(ErrorCode.SERVICE_INACTIVE);
+        }
+
+        return buildAvailableSlots(service, date);
+    }
+
+    @Transactional(readOnly = true)
     public List<AvailableSlotResponse> getAvailableSlots(Long businessId, Long serviceId, LocalDate date) {
         Business business = getCurrentOwnerBusiness(businessId);
 
@@ -58,6 +78,10 @@ public class AvailabilityService {
             throw new AppException(ErrorCode.SERVICE_INACTIVE);
         }
 
+        return buildAvailableSlots(service, date);
+    }
+
+    private List<AvailableSlotResponse> buildAvailableSlots(ServiceOffering service, LocalDate date) {
         List<AvailableSlotResponse> slots = new ArrayList<>();
 
         List<StaffServiceAssignment> assignments =
@@ -99,6 +123,15 @@ public class AvailabilityService {
         LocalTime slotStart = workingHour.getStartTime();
         LocalTime workingEnd = workingHour.getEndTime();
 
+        if (!isPastSlot(date, slotStart) && !hasOverlap(slotStart, workingEnd, appointments)) {
+            slots.add(new AvailableSlotResponse(
+                    staff.getId(),
+                    staff.getFullName(),
+                    date,
+                    slotStart,
+                    workingEnd
+            ));
+        }
         while (!slotStart.plusMinutes(service.getDurationMinutes()).isAfter(workingEnd)) {
             LocalTime slotEnd = slotStart.plusMinutes(service.getDurationMinutes());
 
@@ -116,6 +149,11 @@ public class AvailabilityService {
         }
 
         return slots;
+    }
+
+    private boolean isPastSlot(LocalDate date, LocalTime startTime) {
+        return LocalDateTime.of(date, startTime)
+                .isBefore(LocalDateTime.now(BookingConstants.DEFAULT_ZONE_ID));
     }
 
     private boolean hasOverlap(LocalTime slotStart, LocalTime slotEnd, List<Appointment> appointments) {
