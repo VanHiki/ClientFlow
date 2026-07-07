@@ -31,6 +31,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             LocalTime startTime
     );
 
-
     Optional<Appointment> findByIdAndBusinessId(Long id, Long businessId);
+
+    long countByBusinessId(Long businessId);
+
+    long countByBusinessIdAndAppointmentDate(Long businessId, LocalDate appointmentDate);
+
+    long countByBusinessIdAndStatus(Long businessId, AppointmentStatus status);
+
+    List<Appointment> findTop5ByBusinessIdAndAppointmentDateGreaterThanEqualAndStatusInOrderByAppointmentDateAscStartTimeAsc(
+            Long businessId,
+            LocalDate appointmentDate,
+            Collection<AppointmentStatus> statuses
+    );
 }

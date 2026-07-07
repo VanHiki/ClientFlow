@@ -13,4 +13,5 @@ public interface StaffProfileRepository extends JpaRepository<StaffProfile, Long
     Optional<StaffProfile> findByIdAndBusinessId(Long id, Long businessId);
 
     boolean existsByBusinessIdAndEmailIgnoreCase(Long businessId, String email);
+    long countByBusinessIdAndActiveTrue(Long businessId);
 }

@@ -18,4 +18,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
     boolean existsByBusinessIdAndEmailIgnoreCase(Long businessId, String email);
     Optional<Customer> findByBusinessIdAndPhone(Long businessId, String phone);
+
+    long countByBusinessIdAndActiveTrue(Long businessId);
 }
