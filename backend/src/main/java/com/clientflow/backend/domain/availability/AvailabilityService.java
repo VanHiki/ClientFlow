@@ -1,0 +1,135 @@
+package com.clientflow.backend.domain.availability;
+
+import com.clientflow.backend.common.BookingConstants;
+import com.clientflow.backend.common.enums.AppointmentStatus;
+import com.clientflow.backend.common.enums.ErrorCode;
+import com.clientflow.backend.common.exception.AppException;
+import com.clientflow.backend.domain.appointment.Appointment;
+import com.clientflow.backend.domain.appointment.AppointmentRepository;
+import com.clientflow.backend.domain.business.Business;
+import com.clientflow.backend.domain.business.BusinessRepository;
+import com.clientflow.backend.domain.availability.dto.AvailableSlotResponse;
+import com.clientflow.backend.domain.service.ServiceOffering;
+import com.clientflow.backend.domain.service.ServiceOfferingRepository;
+import com.clientflow.backend.domain.staff.StaffProfile;
+import com.clientflow.backend.domain.staffservice.StaffServiceAssignment;
+import com.clientflow.backend.domain.staffservice.StaffServiceAssignmentRepository;
+import com.clientflow.backend.domain.workinghour.WorkingHour;
+import com.clientflow.backend.domain.workinghour.WorkingHourRepository;
+import com.clientflow.backend.security.SecurityUtil;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class AvailabilityService {
+
+    BusinessRepository businessRepository;
+    ServiceOfferingRepository serviceOfferingRepository;
+    StaffServiceAssignmentRepository staffServiceAssignmentRepository;
+    WorkingHourRepository workingHourRepository;
+    AppointmentRepository appointmentRepository;
+    SecurityUtil securityUtil;
+
+    private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
+            AppointmentStatus.PENDING,
+            AppointmentStatus.CONFIRMED,
+            AppointmentStatus.CHECKED_IN,
+            AppointmentStatus.COMPLETED
+    );
+
+    @Transactional(readOnly = true)
+    public List<AvailableSlotResponse> getAvailableSlots(Long businessId, Long serviceId, LocalDate date) {
+        Business business = getCurrentOwnerBusiness(businessId);
+
+        ServiceOffering service = serviceOfferingRepository.findByIdAndBusinessId(serviceId, business.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.SERVICE_NOT_FOUND));
+
+        if (!service.isActive()) {
+            throw new AppException(ErrorCode.SERVICE_INACTIVE);
+        }
+
+        List<AvailableSlotResponse> slots = new ArrayList<>();
+
+        List<StaffServiceAssignment> assignments =
+                staffServiceAssignmentRepository.findByServiceOfferingId(service.getId());
+
+        for (StaffServiceAssignment assignment : assignments) {
+            StaffProfile staff = assignment.getStaffProfile();
+
+            List<WorkingHour> workingHours =
+                    workingHourRepository.findByStaffProfileIdAndDayOfWeekAndActiveTrue(
+                            staff.getId(),
+                            date.getDayOfWeek()
+                    );
+
+            List<Appointment> appointments =
+                    appointmentRepository.findByStaffProfileIdAndAppointmentDateAndStatusIn(
+                            staff.getId(),
+                            date,
+                            BLOCKING_STATUSES
+                    );
+
+            for (WorkingHour workingHour : workingHours) {
+                slots.addAll(buildSlotsForWorkingHour(staff, service, date, workingHour, appointments));
+            }
+        }
+
+        return slots;
+    }
+
+    private List<AvailableSlotResponse> buildSlotsForWorkingHour(
+            StaffProfile staff,
+            ServiceOffering service,
+            LocalDate date,
+            WorkingHour workingHour,
+            List<Appointment> appointments
+    ) {
+        List<AvailableSlotResponse> slots = new ArrayList<>();
+
+        LocalTime slotStart = workingHour.getStartTime();
+        LocalTime workingEnd = workingHour.getEndTime();
+
+        while (!slotStart.plusMinutes(service.getDurationMinutes()).isAfter(workingEnd)) {
+            LocalTime slotEnd = slotStart.plusMinutes(service.getDurationMinutes());
+
+            if (!hasOverlap(slotStart, slotEnd, appointments)) {
+                slots.add(new AvailableSlotResponse(
+                        staff.getId(),
+                        staff.getFullName(),
+                        date,
+                        slotStart,
+                        slotEnd
+                ));
+            }
+
+            slotStart = slotStart.plusMinutes(BookingConstants.SLOT_STEP_MINUTES);
+        }
+
+        return slots;
+    }
+
+    private boolean hasOverlap(LocalTime slotStart, LocalTime slotEnd, List<Appointment> appointments) {
+        return appointments.stream()
+                .anyMatch(appointment ->
+                        slotStart.isBefore(appointment.getEndTime())
+                                && slotEnd.isAfter(appointment.getStartTime())
+                );
+    }
+
+    private Business getCurrentOwnerBusiness(Long businessId) {
+        Long ownerId = securityUtil.getCurrentUserId();
+
+        return businessRepository.findByIdAndOwnerId(businessId, ownerId)
+                .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
+    }
+}
