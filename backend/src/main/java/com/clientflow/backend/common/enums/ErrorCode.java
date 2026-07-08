@@ -38,7 +38,10 @@ public enum ErrorCode {
     STAFF_TIME_OFF_NOT_FOUND(1029, "Staff time off not found", HttpStatus.NOT_FOUND),
     INVALID_STAFF_TIME_OFF_RANGE(1030, "Staff time off start time must be before end time", HttpStatus.BAD_REQUEST),
     STAFF_TIME_OFF_OVERLAP(1031, "Staff time off overlaps with existing time off", HttpStatus.CONFLICT),
-    APPOINTMENT_DURING_STAFF_TIME_OFF(1032, "Appointment is during staff time off", HttpStatus.BAD_REQUEST);
+    APPOINTMENT_DURING_STAFF_TIME_OFF(1032, "Appointment is during staff time off", HttpStatus.BAD_REQUEST),
+    BUSINESS_EXCEPTION_NOT_FOUND(1033, "Business exception not found", HttpStatus.NOT_FOUND),
+    BUSINESS_EXCEPTION_ALREADY_EXISTS(1034, "Business exception already exists on this date", HttpStatus.CONFLICT),
+    APPOINTMENT_ON_BUSINESS_EXCEPTION(1035, "Appointment date is closed for this business", HttpStatus.BAD_REQUEST);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

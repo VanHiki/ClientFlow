@@ -9,6 +9,7 @@ import com.clientflow.backend.domain.appointment.AppointmentRepository;
 import com.clientflow.backend.domain.business.Business;
 import com.clientflow.backend.domain.business.BusinessRepository;
 import com.clientflow.backend.domain.availability.dto.AvailableSlotResponse;
+import com.clientflow.backend.domain.businessexception.BusinessExceptionDayRepository;
 import com.clientflow.backend.domain.service.ServiceOffering;
 import com.clientflow.backend.domain.service.ServiceOfferingRepository;
 import com.clientflow.backend.domain.staff.StaffProfile;
@@ -42,6 +43,7 @@ public class AvailabilityService {
     WorkingHourRepository workingHourRepository;
     AppointmentRepository appointmentRepository;
     StaffTimeOffRepository staffTimeOffRepository;
+    BusinessExceptionDayRepository businessExceptionDayRepository;
     SecurityUtil securityUtil;
 
     private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
@@ -67,7 +69,7 @@ public class AvailabilityService {
             throw new AppException(ErrorCode.SERVICE_INACTIVE);
         }
 
-        return buildAvailableSlots(service, date);
+        return buildAvailableSlots(business, service, date);
     }
 
     @Transactional(readOnly = true)
@@ -81,11 +83,15 @@ public class AvailabilityService {
             throw new AppException(ErrorCode.SERVICE_INACTIVE);
         }
 
-        return buildAvailableSlots(service, date);
+        return buildAvailableSlots(business, service, date);
     }
 
-    private List<AvailableSlotResponse> buildAvailableSlots(ServiceOffering service, LocalDate date) {
+    private List<AvailableSlotResponse> buildAvailableSlots(Business business, ServiceOffering service, LocalDate date) {
         List<AvailableSlotResponse> slots = new ArrayList<>();
+
+        if (businessExceptionDayRepository.existsByBusinessIdAndDate(business.getId(), date)) {
+            return slots;
+        }
 
         List<StaffServiceAssignment> assignments =
                 staffServiceAssignmentRepository.findByServiceOfferingId(service.getId());

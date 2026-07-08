@@ -11,6 +11,7 @@ import com.clientflow.backend.domain.appointment.dto.AppointmentStatusUpdateRequ
 import com.clientflow.backend.domain.appointment.mapper.AppointmentMapper;
 import com.clientflow.backend.domain.business.Business;
 import com.clientflow.backend.domain.business.BusinessRepository;
+import com.clientflow.backend.domain.businessexception.BusinessExceptionDayRepository;
 import com.clientflow.backend.domain.customer.Customer;
 import com.clientflow.backend.domain.customer.CustomerRepository;
 import com.clientflow.backend.domain.service.ServiceOffering;
@@ -44,6 +45,7 @@ public class AppointmentService {
     StaffServiceAssignmentRepository staffServiceAssignmentRepository;
     WorkingHourRepository workingHourRepository;
     StaffTimeOffRepository staffTimeOffRepository;
+    BusinessExceptionDayRepository businessExceptionDayRepository;
     AppointmentMapper appointmentMapper;
     SecurityUtil securityUtil;
 
@@ -79,6 +81,7 @@ public class AppointmentService {
         LocalTime endTime = request.startTime().plusMinutes(service.getDurationMinutes());
 
         validateNotInPast(request);
+        validateNotOnBusinessException(business, request);
         validateInsideWorkingHours(staff, request, endTime);
         validateNotDuringTimeOff(staff, request, endTime);
         validateNoOverlap(staff, request, endTime);
@@ -193,6 +196,12 @@ public class AppointmentService {
 
         if (appointmentStart.isBefore(now)) {
             throw new AppException(ErrorCode.APPOINTMENT_IN_PAST);
+        }
+    }
+
+    private void validateNotOnBusinessException(Business business, AppointmentCreateRequest request) {
+        if (businessExceptionDayRepository.existsByBusinessIdAndDate(business.getId(), request.appointmentDate())) {
+            throw new AppException(ErrorCode.APPOINTMENT_ON_BUSINESS_EXCEPTION);
         }
     }
 
