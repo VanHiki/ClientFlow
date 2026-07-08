@@ -34,7 +34,11 @@ public enum ErrorCode {
     APPOINTMENT_OVERLAP(1025, "Staff already has an appointment in this time range", HttpStatus.CONFLICT),
     STAFF_NOT_ASSIGNED_TO_SERVICE(1026, "Staff is not assigned to this service", HttpStatus.BAD_REQUEST),
     SERVICE_INACTIVE(1027, "Service is inactive", HttpStatus.BAD_REQUEST),
-    INVALID_APPOINTMENT_STATUS_TRANSITION(1028, "Invalid appointment status transition", HttpStatus.BAD_REQUEST);
+    INVALID_APPOINTMENT_STATUS_TRANSITION(1028, "Invalid appointment status transition", HttpStatus.BAD_REQUEST),
+    STAFF_TIME_OFF_NOT_FOUND(1029, "Staff time off not found", HttpStatus.NOT_FOUND),
+    INVALID_STAFF_TIME_OFF_RANGE(1030, "Staff time off start time must be before end time", HttpStatus.BAD_REQUEST),
+    STAFF_TIME_OFF_OVERLAP(1031, "Staff time off overlaps with existing time off", HttpStatus.CONFLICT),
+    APPOINTMENT_DURING_STAFF_TIME_OFF(1032, "Appointment is during staff time off", HttpStatus.BAD_REQUEST);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;
