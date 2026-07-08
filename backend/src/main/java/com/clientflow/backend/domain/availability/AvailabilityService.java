@@ -14,6 +14,8 @@ import com.clientflow.backend.domain.service.ServiceOfferingRepository;
 import com.clientflow.backend.domain.staff.StaffProfile;
 import com.clientflow.backend.domain.staffservice.StaffServiceAssignment;
 import com.clientflow.backend.domain.staffservice.StaffServiceAssignmentRepository;
+import com.clientflow.backend.domain.stafftimeoff.StaffTimeOff;
+import com.clientflow.backend.domain.stafftimeoff.StaffTimeOffRepository;
 import com.clientflow.backend.domain.workinghour.WorkingHour;
 import com.clientflow.backend.domain.workinghour.WorkingHourRepository;
 import com.clientflow.backend.security.SecurityUtil;
@@ -39,6 +41,7 @@ public class AvailabilityService {
     StaffServiceAssignmentRepository staffServiceAssignmentRepository;
     WorkingHourRepository workingHourRepository;
     AppointmentRepository appointmentRepository;
+    StaffTimeOffRepository staffTimeOffRepository;
     SecurityUtil securityUtil;
 
     private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
@@ -103,8 +106,11 @@ public class AvailabilityService {
                             BLOCKING_STATUSES
                     );
 
+            List<StaffTimeOff> timeOffs =
+                    staffTimeOffRepository.findByStaffProfileIdAndDate(staff.getId(), date);
+
             for (WorkingHour workingHour : workingHours) {
-                slots.addAll(buildSlotsForWorkingHour(staff, service, date, workingHour, appointments));
+                slots.addAll(buildSlotsForWorkingHour(staff, service, date, workingHour, appointments, timeOffs));
             }
         }
 
@@ -116,26 +122,20 @@ public class AvailabilityService {
             ServiceOffering service,
             LocalDate date,
             WorkingHour workingHour,
-            List<Appointment> appointments
+            List<Appointment> appointments,
+            List<StaffTimeOff> timeOffs
     ) {
         List<AvailableSlotResponse> slots = new ArrayList<>();
 
         LocalTime slotStart = workingHour.getStartTime();
         LocalTime workingEnd = workingHour.getEndTime();
 
-        if (!isPastSlot(date, slotStart) && !hasOverlap(slotStart, workingEnd, appointments)) {
-            slots.add(new AvailableSlotResponse(
-                    staff.getId(),
-                    staff.getFullName(),
-                    date,
-                    slotStart,
-                    workingEnd
-            ));
-        }
         while (!slotStart.plusMinutes(service.getDurationMinutes()).isAfter(workingEnd)) {
             LocalTime slotEnd = slotStart.plusMinutes(service.getDurationMinutes());
 
-            if (!hasOverlap(slotStart, slotEnd, appointments)) {
+            if (!isPastSlot(date, slotStart)
+                    && !hasAppointmentOverlap(slotStart, slotEnd, appointments)
+                    && !hasTimeOffOverlap(slotStart, slotEnd, timeOffs)) {
                 slots.add(new AvailableSlotResponse(
                         staff.getId(),
                         staff.getFullName(),
@@ -156,11 +156,19 @@ public class AvailabilityService {
                 .isBefore(LocalDateTime.now(BookingConstants.DEFAULT_ZONE_ID));
     }
 
-    private boolean hasOverlap(LocalTime slotStart, LocalTime slotEnd, List<Appointment> appointments) {
+    private boolean hasAppointmentOverlap(LocalTime slotStart, LocalTime slotEnd, List<Appointment> appointments) {
         return appointments.stream()
                 .anyMatch(appointment ->
                         slotStart.isBefore(appointment.getEndTime())
                                 && slotEnd.isAfter(appointment.getStartTime())
+                );
+    }
+
+    private boolean hasTimeOffOverlap(LocalTime slotStart, LocalTime slotEnd, List<StaffTimeOff> timeOffs) {
+        return timeOffs.stream()
+                .anyMatch(timeOff ->
+                        slotStart.isBefore(timeOff.getEndTime())
+                                && slotEnd.isAfter(timeOff.getStartTime())
                 );
     }
 

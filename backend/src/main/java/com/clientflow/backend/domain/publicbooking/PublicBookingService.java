@@ -20,6 +20,7 @@ import com.clientflow.backend.domain.service.ServiceOfferingRepository;
 import com.clientflow.backend.domain.staff.StaffProfile;
 import com.clientflow.backend.domain.staff.StaffProfileRepository;
 import com.clientflow.backend.domain.staffservice.StaffServiceAssignmentRepository;
+import com.clientflow.backend.domain.stafftimeoff.StaffTimeOffRepository;
 import com.clientflow.backend.domain.workinghour.WorkingHourRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class PublicBookingService {
     StaffProfileRepository staffProfileRepository;
     StaffServiceAssignmentRepository staffServiceAssignmentRepository;
     WorkingHourRepository workingHourRepository;
+    StaffTimeOffRepository staffTimeOffRepository;
     AppointmentRepository appointmentRepository;
     AppointmentMapper appointmentMapper;
 
@@ -107,6 +109,7 @@ public class PublicBookingService {
 
         validateNotInPast(request);
         validateInsideWorkingHours(staff, request, endTime);
+        validateNotDuringTimeOff(staff, request, endTime);
         validateNoOverlap(staff, request, endTime);
 
         Appointment appointment = Appointment.builder()
@@ -176,6 +179,24 @@ public class PublicBookingService {
 
         if (!insideWorkingHours) {
             throw new AppException(ErrorCode.APPOINTMENT_OUTSIDE_WORKING_HOURS);
+        }
+    }
+
+    private void validateNotDuringTimeOff(
+            StaffProfile staff,
+            PublicAppointmentCreateRequest request,
+            LocalTime endTime
+    ) {
+        boolean duringTimeOff = staffTimeOffRepository
+                .findByStaffProfileIdAndDate(staff.getId(), request.appointmentDate())
+                .stream()
+                .anyMatch(timeOff ->
+                        request.startTime().isBefore(timeOff.getEndTime())
+                                && endTime.isAfter(timeOff.getStartTime())
+                );
+
+        if (duringTimeOff) {
+            throw new AppException(ErrorCode.APPOINTMENT_DURING_STAFF_TIME_OFF);
         }
     }
 
