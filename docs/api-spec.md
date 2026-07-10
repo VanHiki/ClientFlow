@@ -817,9 +817,27 @@ Response result:
 ### List Customers
 
 ```http
-GET /api/businesses/{businessId}/customers?page=0&size=10
+GET /api/businesses/{businessId}/customers?page=0&size=10&keyword=tran&active=true
 Authorization: Bearer <token>
 ```
+
+`keyword` searches customer name, phone, and email. Both filters are optional.
+
+### Get Customer Detail
+
+```http
+GET /api/businesses/{businessId}/customers/{customerId}
+Authorization: Bearer <token>
+```
+
+### Get Customer Appointment History
+
+```http
+GET /api/businesses/{businessId}/customers/{customerId}/appointments?page=0&size=10&status=COMPLETED&fromDate=2026-01-01&toDate=2026-12-31
+Authorization: Bearer <token>
+```
+
+`status`, `fromDate`, and `toDate` are optional.
 
 ### Update Customer
 

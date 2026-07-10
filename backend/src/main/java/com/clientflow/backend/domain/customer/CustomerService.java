@@ -3,6 +3,10 @@ package com.clientflow.backend.domain.customer;
 import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
 import com.clientflow.backend.common.response.PageResponse;
+import com.clientflow.backend.common.enums.AppointmentStatus;
+import com.clientflow.backend.domain.appointment.AppointmentRepository;
+import com.clientflow.backend.domain.appointment.dto.AppointmentResponse;
+import com.clientflow.backend.domain.appointment.mapper.AppointmentMapper;
 import com.clientflow.backend.domain.business.Business;
 import com.clientflow.backend.domain.business.BusinessRepository;
 import com.clientflow.backend.domain.customer.dto.CustomerCreateRequest;
@@ -18,14 +22,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CustomerService {
 
     CustomerRepository customerRepository;
+    AppointmentRepository appointmentRepository;
     BusinessRepository businessRepository;
     CustomerMapper customerMapper;
+    AppointmentMapper appointmentMapper;
     SecurityUtil securityUtil;
 
     @Transactional
@@ -54,19 +62,66 @@ public class CustomerService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<CustomerResponse> getCustomers(Long businessId, Pageable pageable) {
+    public PageResponse<CustomerResponse> getCustomers(
+            Long businessId,
+            String keyword,
+            Boolean active,
+            Pageable pageable
+    ) {
         Business business = getCurrentOwnerBusiness(businessId);
 
         return PageResponse.from(
-                customerRepository.findByBusinessId(business.getId(), pageable)
+                customerRepository.search(
+                                business.getId(),
+                                normalizeNullable(keyword),
+                                active,
+                                pageable
+                        )
                         .map(customerMapper::toResponse)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerResponse getCustomer(Long businessId, Long customerId) {
+        Business business = getCurrentOwnerBusiness(businessId);
+
+        return customerMapper.toResponse(findCustomer(business.getId(), customerId));
+    }
+
+    @Transactional(readOnly = true)
+    public PageResponse<AppointmentResponse> getCustomerAppointments(
+            Long businessId,
+            Long customerId,
+            AppointmentStatus status,
+            LocalDate fromDate,
+            LocalDate toDate,
+            Pageable pageable
+    ) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        Customer customer = findCustomer(business.getId(), customerId);
+
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
+        return PageResponse.from(
+                appointmentRepository.search(
+                                business.getId(),
+                                status,
+                                null,
+                                customer.getId(),
+                                fromDate,
+                                toDate,
+                                pageable
+                        )
+                        .map(appointmentMapper::toResponse)
         );
     }
 
     @Transactional
     public CustomerResponse updateCustomer(Long businessId, Long customerId, CustomerUpdateRequest request) {
         Business business = getCurrentOwnerBusiness(businessId);
-        Customer customer = getCustomer(business.getId(), customerId);
+        Customer customer = findCustomer(business.getId(), customerId);
         String phone = request.phone().trim();
         String email = normalizeEmail(request.email());
 
@@ -97,7 +152,7 @@ public class CustomerService {
             CustomerStatusUpdateRequest request
     ) {
         Business business = getCurrentOwnerBusiness(businessId);
-        Customer customer = getCustomer(business.getId(), customerId);
+        Customer customer = findCustomer(business.getId(), customerId);
 
         customer.setActive(request.active());
 
@@ -111,7 +166,7 @@ public class CustomerService {
                 .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
     }
 
-    private Customer getCustomer(Long businessId, Long customerId) {
+    private Customer findCustomer(Long businessId, Long customerId) {
         return customerRepository.findByIdAndBusinessId(customerId, businessId)
                 .orElseThrow(() -> new AppException(ErrorCode.CUSTOMER_NOT_FOUND));
     }
