@@ -9,6 +9,7 @@ import com.clientflow.backend.domain.staff.StaffProfile;
 import com.clientflow.backend.domain.staff.StaffProfileRepository;
 import com.clientflow.backend.domain.stafftimeoff.dto.StaffTimeOffCreateRequest;
 import com.clientflow.backend.domain.stafftimeoff.dto.StaffTimeOffResponse;
+import com.clientflow.backend.domain.stafftimeoff.dto.StaffTimeOffUpdateRequest;
 import com.clientflow.backend.domain.stafftimeoff.mapper.StaffTimeOffMapper;
 import com.clientflow.backend.security.SecurityUtil;
 import lombok.AccessLevel;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Service
@@ -41,7 +43,13 @@ public class StaffTimeOffService {
         StaffProfile staff = getStaffProfile(business.getId(), staffId);
 
         validateTimeRange(request.startTime(), request.endTime());
-        validateNoOverlap(staff, request);
+        validateNoOverlap(
+                staff,
+                request.date(),
+                request.startTime(),
+                request.endTime(),
+                null
+        );
 
         StaffTimeOff timeOff = StaffTimeOff.builder()
                 .staffProfile(staff)
@@ -69,19 +77,63 @@ public class StaffTimeOffService {
         );
     }
 
+    @Transactional
+    public StaffTimeOffResponse updateTimeOff(
+            Long businessId,
+            Long staffId,
+            Long timeOffId,
+            StaffTimeOffUpdateRequest request
+    ) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        StaffProfile staff = getStaffProfile(business.getId(), staffId);
+        StaffTimeOff timeOff = getTimeOff(staff.getId(), timeOffId);
+
+        validateTimeRange(request.startTime(), request.endTime());
+        validateNoOverlap(
+                staff,
+                request.date(),
+                request.startTime(),
+                request.endTime(),
+                timeOff.getId()
+        );
+
+        timeOff.setDate(request.date());
+        timeOff.setStartTime(request.startTime());
+        timeOff.setEndTime(request.endTime());
+        timeOff.setReason(normalizeNullable(request.reason()));
+
+        return staffTimeOffMapper.toResponse(timeOff);
+    }
+
+    @Transactional
+    public void deleteTimeOff(Long businessId, Long staffId, Long timeOffId) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        StaffProfile staff = getStaffProfile(business.getId(), staffId);
+        StaffTimeOff timeOff = getTimeOff(staff.getId(), timeOffId);
+
+        staffTimeOffRepository.delete(timeOff);
+    }
+
     private void validateTimeRange(LocalTime startTime, LocalTime endTime) {
         if (!startTime.isBefore(endTime)) {
             throw new AppException(ErrorCode.INVALID_STAFF_TIME_OFF_RANGE);
         }
     }
 
-    private void validateNoOverlap(StaffProfile staff, StaffTimeOffCreateRequest request) {
+    private void validateNoOverlap(
+            StaffProfile staff,
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            Long excludeTimeOffId
+    ) {
         boolean hasOverlap = staffTimeOffRepository
-                .findByStaffProfileIdAndDate(staff.getId(), request.date())
+                .findByStaffProfileIdAndDate(staff.getId(), date)
                 .stream()
+                .filter(existing -> !existing.getId().equals(excludeTimeOffId))
                 .anyMatch(existing ->
-                        request.startTime().isBefore(existing.getEndTime())
-                                && request.endTime().isAfter(existing.getStartTime())
+                        startTime.isBefore(existing.getEndTime())
+                                && endTime.isAfter(existing.getStartTime())
                 );
 
         if (hasOverlap) {
@@ -99,6 +151,11 @@ public class StaffTimeOffService {
     private StaffProfile getStaffProfile(Long businessId, Long staffId) {
         return staffProfileRepository.findByIdAndBusinessId(staffId, businessId)
                 .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+    }
+
+    private StaffTimeOff getTimeOff(Long staffId, Long timeOffId) {
+        return staffTimeOffRepository.findByIdAndStaffProfileId(timeOffId, staffId)
+                .orElseThrow(() -> new AppException(ErrorCode.STAFF_TIME_OFF_NOT_FOUND));
     }
 
     private String normalizeNullable(String value) {

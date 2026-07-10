@@ -672,6 +672,36 @@ GET /api/businesses/{businessId}/staff/{staffId}/time-off?page=0&size=10
 Authorization: Bearer <token>
 ```
 
+### Update Staff Time Off
+
+```http
+PUT /api/businesses/{businessId}/staff/{staffId}/time-off/{timeOffId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "date": "2026-07-13",
+  "startTime": "13:00",
+  "endTime": "15:00",
+  "reason": "Updated personal leave"
+}
+```
+
+The updated time range must not overlap another time-off record for the same staff member and date.
+
+### Delete Staff Time Off
+
+```http
+DELETE /api/businesses/{businessId}/staff/{staffId}/time-off/{timeOffId}
+Authorization: Bearer <token>
+```
+
+Deleting a time-off record opens its slots again. Existing appointments are not deleted.
+
 ## Business Exceptions
 
 Business exceptions are full-day closures for a business. Available slots return an empty list for the date, and appointment creation is blocked.

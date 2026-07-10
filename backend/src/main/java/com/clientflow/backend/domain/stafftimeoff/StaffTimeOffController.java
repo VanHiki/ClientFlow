@@ -4,6 +4,7 @@ import com.clientflow.backend.common.response.ApiResponse;
 import com.clientflow.backend.common.response.PageResponse;
 import com.clientflow.backend.domain.stafftimeoff.dto.StaffTimeOffCreateRequest;
 import com.clientflow.backend.domain.stafftimeoff.dto.StaffTimeOffResponse;
+import com.clientflow.backend.domain.stafftimeoff.dto.StaffTimeOffUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -45,6 +46,34 @@ public class StaffTimeOffController {
         return ApiResponse.<PageResponse<StaffTimeOffResponse>>builder()
                 .message("Get staff time off successfully")
                 .result(staffTimeOffService.getTimeOffs(businessId, staffId, pageable))
+                .build();
+    }
+
+    @PutMapping("/{timeOffId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<StaffTimeOffResponse> updateTimeOff(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @PathVariable Long timeOffId,
+            @Valid @RequestBody StaffTimeOffUpdateRequest request
+    ) {
+        return ApiResponse.<StaffTimeOffResponse>builder()
+                .message("Staff time off updated successfully")
+                .result(staffTimeOffService.updateTimeOff(businessId, staffId, timeOffId, request))
+                .build();
+    }
+
+    @DeleteMapping("/{timeOffId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<Void> deleteTimeOff(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @PathVariable Long timeOffId
+    ) {
+        staffTimeOffService.deleteTimeOff(businessId, staffId, timeOffId);
+
+        return ApiResponse.<Void>builder()
+                .message("Staff time off deleted successfully")
                 .build();
     }
 }
