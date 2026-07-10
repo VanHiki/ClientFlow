@@ -267,6 +267,67 @@ GET /api/businesses/{businessId}/services?page=0&size=10
 Authorization: Bearer <token>
 ```
 
+### Update Service
+
+```http
+PUT /api/businesses/{businessId}/services/{serviceId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "name": "Hair Cut Premium",
+  "description": "Haircut with styling",
+  "price": 150000,
+  "durationMinutes": 45
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "name": "Hair Cut Premium",
+  "description": "Haircut with styling",
+  "price": 150000.00,
+  "durationMinutes": 45,
+  "active": true
+}
+```
+
+### Update Service Status
+
+```http
+PATCH /api/businesses/{businessId}/services/{serviceId}/status
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "active": false
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "name": "Hair Cut Premium",
+  "description": "Haircut with styling",
+  "price": 150000.00,
+  "durationMinutes": 45,
+  "active": false
+}
+```
+
 ## Staff
 
 ### Create Staff

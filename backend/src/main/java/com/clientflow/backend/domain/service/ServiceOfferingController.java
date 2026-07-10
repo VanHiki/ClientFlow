@@ -4,6 +4,8 @@ import com.clientflow.backend.common.response.ApiResponse;
 import com.clientflow.backend.common.response.PageResponse;
 import com.clientflow.backend.domain.service.dto.ServiceCreateRequest;
 import com.clientflow.backend.domain.service.dto.ServiceResponse;
+import com.clientflow.backend.domain.service.dto.ServiceStatusUpdateRequest;
+import com.clientflow.backend.domain.service.dto.ServiceUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +48,32 @@ public class ServiceOfferingController {
         return ApiResponse.<PageResponse<ServiceResponse>>builder()
                 .message("Get services successfully")
                 .result(serviceOfferingService.getServices(businessId, pageable))
+                .build();
+    }
+
+    @PutMapping("/{serviceId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<ServiceResponse> updateService(
+            @PathVariable Long businessId,
+            @PathVariable Long serviceId,
+            @Valid @RequestBody ServiceUpdateRequest request
+    ) {
+        return ApiResponse.<ServiceResponse>builder()
+                .message("Service updated successfully")
+                .result(serviceOfferingService.updateService(businessId, serviceId, request))
+                .build();
+    }
+
+    @PatchMapping("/{serviceId}/status")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<ServiceResponse> updateServiceStatus(
+            @PathVariable Long businessId,
+            @PathVariable Long serviceId,
+            @Valid @RequestBody ServiceStatusUpdateRequest request
+    ) {
+        return ApiResponse.<ServiceResponse>builder()
+                .message("Service status updated successfully")
+                .result(serviceOfferingService.updateServiceStatus(businessId, serviceId, request))
                 .build();
     }
 

@@ -15,5 +15,6 @@ public interface ServiceOfferingRepository extends JpaRepository<ServiceOffering
     Optional<ServiceOffering> findByIdAndBusinessId(Long id, Long businessId);
     List<ServiceOffering> findByBusinessIdAndActiveTrueOrderByCreatedAtDesc(Long businessId);
     boolean existsByBusinessIdAndNameIgnoreCase(Long businessId, String name);
+    boolean existsByBusinessIdAndNameIgnoreCaseAndIdNot(Long businessId, String name, Long id);
     long countByBusinessIdAndActiveTrue(Long businessId);
 }
