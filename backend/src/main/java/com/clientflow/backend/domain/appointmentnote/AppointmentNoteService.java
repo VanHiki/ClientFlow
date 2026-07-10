@@ -7,6 +7,7 @@ import com.clientflow.backend.domain.appointment.Appointment;
 import com.clientflow.backend.domain.appointment.AppointmentRepository;
 import com.clientflow.backend.domain.appointmentnote.dto.AppointmentNoteCreateRequest;
 import com.clientflow.backend.domain.appointmentnote.dto.AppointmentNoteResponse;
+import com.clientflow.backend.domain.appointmentnote.dto.AppointmentNoteUpdateRequest;
 import com.clientflow.backend.domain.appointmentnote.mapper.AppointmentNoteMapper;
 import com.clientflow.backend.domain.business.Business;
 import com.clientflow.backend.domain.business.BusinessRepository;
@@ -60,9 +61,39 @@ public class AppointmentNoteService {
         );
     }
 
+    @Transactional
+    public AppointmentNoteResponse updateNote(
+            Long businessId,
+            Long appointmentId,
+            Long noteId,
+            AppointmentNoteUpdateRequest request
+    ) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        Appointment appointment = getAppointment(business.getId(), appointmentId);
+        AppointmentNote note = getNote(appointment.getId(), noteId);
+
+        note.setContent(request.content().trim());
+
+        return appointmentNoteMapper.toResponse(note);
+    }
+
+    @Transactional
+    public void deleteNote(Long businessId, Long appointmentId, Long noteId) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        Appointment appointment = getAppointment(business.getId(), appointmentId);
+        AppointmentNote note = getNote(appointment.getId(), noteId);
+
+        appointmentNoteRepository.delete(note);
+    }
+
     private Appointment getAppointment(Long businessId, Long appointmentId) {
         return appointmentRepository.findByIdAndBusinessId(appointmentId, businessId)
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+    }
+
+    private AppointmentNote getNote(Long appointmentId, Long noteId) {
+        return appointmentNoteRepository.findByIdAndAppointmentId(noteId, appointmentId)
+                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOTE_NOT_FOUND));
     }
 
     private Business getCurrentOwnerBusiness(Long businessId) {

@@ -45,7 +45,8 @@ public enum ErrorCode {
     STAFF_INACTIVE(1036, "Staff is inactive", HttpStatus.BAD_REQUEST),
     CUSTOMER_INACTIVE(1037, "Customer is inactive", HttpStatus.BAD_REQUEST),
     WORKING_HOUR_NOT_FOUND(1038, "Working hour not found", HttpStatus.NOT_FOUND),
-    STAFF_SERVICE_NOT_FOUND(1039, "Staff service assignment not found", HttpStatus.NOT_FOUND);
+    STAFF_SERVICE_NOT_FOUND(1039, "Staff service assignment not found", HttpStatus.NOT_FOUND),
+    APPOINTMENT_NOTE_NOT_FOUND(1040, "Appointment note not found", HttpStatus.NOT_FOUND);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

@@ -1066,6 +1066,29 @@ Response result:
 }
 ```
 
+### Update Appointment Note
+
+```http
+PUT /api/businesses/{businessId}/appointments/{appointmentId}/notes/{noteId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "content": "Customer prefers a quiet stylist."
+}
+```
+
+### Delete Appointment Note
+
+```http
+DELETE /api/businesses/{businessId}/appointments/{appointmentId}/notes/{noteId}
+Authorization: Bearer <token>
+```
+
 ## Dashboard
 
 ### Get Dashboard
