@@ -48,4 +48,18 @@ public class StaffServiceAssignmentController {
                 .result(staffServiceAssignmentService.getStaffServices(businessId, staffId, pageable))
                 .build();
     }
+
+    @DeleteMapping("/{serviceId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<Void> unassignService(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @PathVariable Long serviceId
+    ) {
+        staffServiceAssignmentService.unassignService(businessId, staffId, serviceId);
+
+        return ApiResponse.<Void>builder()
+                .message("Service unassigned from staff successfully")
+                .build();
+    }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -13,4 +14,9 @@ public interface StaffServiceAssignmentRepository extends JpaRepository<StaffSer
     boolean existsByStaffProfileIdAndServiceOfferingId(Long staffProfileId, Long serviceOfferingId);
     List<StaffServiceAssignment> findByServiceOfferingId(Long serviceOfferingId);
     Page<StaffServiceAssignment> findByStaffProfileId(Long staffProfileId, Pageable pageable);
+
+    Optional<StaffServiceAssignment> findByStaffProfileIdAndServiceOfferingId(
+            Long staffProfileId,
+            Long serviceOfferingId
+    );
 }

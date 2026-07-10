@@ -531,6 +531,15 @@ GET /api/businesses/{businessId}/staff/{staffId}/services?page=0&size=10
 Authorization: Bearer <token>
 ```
 
+### Unassign Service From Staff
+
+```http
+DELETE /api/businesses/{businessId}/staff/{staffId}/services/{serviceId}
+Authorization: Bearer <token>
+```
+
+The staff member will no longer appear in available slots for this service. Existing appointments are preserved.
+
 ## Working Hours
 
 ### Create Working Hour

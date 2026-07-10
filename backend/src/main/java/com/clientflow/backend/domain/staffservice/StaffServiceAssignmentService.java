@@ -61,6 +61,19 @@ public class StaffServiceAssignmentService {
         );
     }
 
+    @Transactional
+    public void unassignService(Long businessId, Long staffId, Long serviceId) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        StaffProfile staffProfile = getStaffProfile(business.getId(), staffId);
+        ServiceOffering serviceOffering = getServiceOffering(business.getId(), serviceId);
+
+        StaffServiceAssignment assignment = staffServiceAssignmentRepository
+                .findByStaffProfileIdAndServiceOfferingId(staffProfile.getId(), serviceOffering.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.STAFF_SERVICE_NOT_FOUND));
+
+        staffServiceAssignmentRepository.delete(assignment);
+    }
+
     private Business getCurrentOwnerBusiness(Long businessId) {
         Long ownerId = securityUtil.getCurrentUserId();
 
