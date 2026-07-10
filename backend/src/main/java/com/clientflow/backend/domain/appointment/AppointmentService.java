@@ -160,36 +160,11 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findByIdAndBusinessId(appointmentId, business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
-        validateStatusTransition(appointment.getStatus(), request.status());
+        AppointmentStatusTransitionPolicy.validate(appointment.getStatus(), request.status());
 
         appointment.setStatus(request.status());
 
         return appointmentMapper.toResponse(appointment);
-    }
-
-    private void validateStatusTransition(AppointmentStatus currentStatus, AppointmentStatus nextStatus) {
-        if (currentStatus == nextStatus) {
-            return;
-        }
-
-        boolean valid = switch (currentStatus) {
-            case PENDING -> nextStatus == AppointmentStatus.CONFIRMED
-                    || nextStatus == AppointmentStatus.CANCELLED;
-
-            case CONFIRMED -> nextStatus == AppointmentStatus.CHECKED_IN
-                    || nextStatus == AppointmentStatus.COMPLETED
-                    || nextStatus == AppointmentStatus.CANCELLED
-                    || nextStatus == AppointmentStatus.NO_SHOW;
-
-            case CHECKED_IN -> nextStatus == AppointmentStatus.COMPLETED
-                    || nextStatus == AppointmentStatus.CANCELLED;
-
-            case COMPLETED, CANCELLED, NO_SHOW -> false;
-        };
-
-        if (!valid) {
-            throw new AppException(ErrorCode.INVALID_APPOINTMENT_STATUS_TRANSITION);
-        }
     }
 
     private void validateDateRange(LocalDate fromDate, LocalDate toDate) {

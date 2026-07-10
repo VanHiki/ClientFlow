@@ -1051,6 +1051,42 @@ CANCELLED
 NO_SHOW
 ```
 
+## Staff Appointment Access
+
+Staff users only see appointments assigned to the `StaffProfile` linked to their JWT account.
+
+### List Assigned Appointments
+
+```http
+GET /api/staff/appointments?page=0&size=10&status=CONFIRMED&fromDate=2026-07-01&toDate=2026-07-31
+Authorization: Bearer <staff-token>
+```
+
+### Get Assigned Appointment
+
+```http
+GET /api/staff/appointments/{appointmentId}
+Authorization: Bearer <staff-token>
+```
+
+### Update Assigned Appointment Status
+
+```http
+PATCH /api/staff/appointments/{appointmentId}/status
+Authorization: Bearer <staff-token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "status": "CHECKED_IN"
+}
+```
+
+The same appointment transition rules apply to Owner and Staff.
+
 ## Appointment Notes
 
 Appointment notes are internal owner notes for an appointment.
