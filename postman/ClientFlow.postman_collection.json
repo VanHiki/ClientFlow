@@ -1,0 +1,1837 @@
+{
+  "info": {
+    "_postman_id": "8bded15e-3923-45f9-a771-4d4b26a8a8f2",
+    "name": "ClientFlow API - Full",
+    "description": "Complete ClientFlow backend API collection. Run folders from top to bottom. Cleanup requests are intentionally placed last.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{ownerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const today = new Date();",
+          "const existingDate = pm.collectionVariables.get(\"bookingDate\");",
+          "const todayText = today.toISOString().slice(0, 10);",
+          "if (!existingDate || existingDate <= todayText) {",
+          "  const nextMonday = new Date(today);",
+          "  const daysUntilMonday = ((8 - nextMonday.getDay()) % 7) || 7;",
+          "  nextMonday.setDate(nextMonday.getDate() + daysUntilMonday);",
+          "  const bookingDate = nextMonday.toISOString().slice(0, 10);",
+          "  const exceptionDate = new Date(nextMonday);",
+          "  exceptionDate.setDate(exceptionDate.getDate() + 1);",
+          "  pm.collectionVariables.set(\"bookingDate\", bookingDate);",
+          "  pm.collectionVariables.set(\"exceptionDate\", exceptionDate.toISOString().slice(0, 10));",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "ownerEmail",
+      "value": "owner@clientflow.local"
+    },
+    {
+      "key": "ownerPassword",
+      "value": "DemoOwner@123"
+    },
+    {
+      "key": "staffEmail",
+      "value": "staff@clientflow.local"
+    },
+    {
+      "key": "staffPassword",
+      "value": "DemoStaff@123"
+    },
+    {
+      "key": "ownerToken",
+      "value": ""
+    },
+    {
+      "key": "staffToken",
+      "value": ""
+    },
+    {
+      "key": "businessId",
+      "value": ""
+    },
+    {
+      "key": "serviceId",
+      "value": ""
+    },
+    {
+      "key": "staffId",
+      "value": ""
+    },
+    {
+      "key": "workingHourId",
+      "value": ""
+    },
+    {
+      "key": "timeOffId",
+      "value": ""
+    },
+    {
+      "key": "exceptionId",
+      "value": ""
+    },
+    {
+      "key": "customerId",
+      "value": ""
+    },
+    {
+      "key": "appointmentId",
+      "value": ""
+    },
+    {
+      "key": "publicAppointmentId",
+      "value": ""
+    },
+    {
+      "key": "noteId",
+      "value": ""
+    },
+    {
+      "key": "staffNoteId",
+      "value": ""
+    },
+    {
+      "key": "notificationId",
+      "value": ""
+    },
+    {
+      "key": "staffNotificationId",
+      "value": ""
+    },
+    {
+      "key": "bookingCode",
+      "value": ""
+    },
+    {
+      "key": "publicBookingCode",
+      "value": ""
+    },
+    {
+      "key": "resetToken",
+      "value": ""
+    },
+    {
+      "key": "slug",
+      "value": "clientflow-demo"
+    },
+    {
+      "key": "bookingDate",
+      "value": ""
+    },
+    {
+      "key": "exceptionDate",
+      "value": ""
+    },
+    {
+      "key": "customerPhone",
+      "value": "0909333444"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register Owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Owner\",\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"Postman@123\",\n  \"phone\": \"0909000000\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"registerEmail\", \"owner+\" + Date.now() + \"@postman.local\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) pm.collectionVariables.set(\"ownerToken\", pm.response.json().result.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\",\n  \"password\": \"{{ownerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"ownerToken\", pm.response.json().result.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{staffEmail}}\",\n  \"password\": \"{{staffPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) pm.collectionVariables.set(\"staffToken\", pm.response.json().result.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/forgot-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ownerEmail}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { const result = pm.response.json().result; if (result && result.resetToken) pm.collectionVariables.set(\"resetToken\", result.resetToken); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/auth/reset-password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{resetToken}}\",\n  \"newPassword\": \"NewPassword@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "Businesses",
+      "item": [
+        {
+          "name": "Create Business",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Business\",\n  \"slug\": \"{{newSlug}}\",\n  \"phone\": \"0909111222\",\n  \"email\": \"postman-business@example.com\",\n  \"address\": \"Ho Chi Minh City\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"newSlug\", \"postman-business-\" + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"businessId\", result.id);",
+                  "  if (result.slug) pm.collectionVariables.set(\"slug\", result.slug);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List My Businesses",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Business Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Business",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Business Updated\",\n  \"slug\": \"{{slug}}\",\n  \"phone\": \"0909111222\",\n  \"email\": \"postman-business@example.com\",\n  \"address\": \"District 1, Ho Chi Minh City\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200 && pm.response.json().result.slug) pm.collectionVariables.set(\"slug\", pm.response.json().result.slug);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Business Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Services",
+      "item": [
+        {
+          "name": "Create Service",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/services",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Hair Cut\",\n  \"description\": \"Service created from Postman\",\n  \"price\": 150000,\n  \"durationMinutes\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"serviceId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Services With Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/services?page=0&size=10&keyword=hair&active=true"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/services/{{serviceId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Hair Cut Updated\",\n  \"description\": \"Updated from Postman\",\n  \"price\": 180000,\n  \"durationMinutes\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Service Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/services/{{serviceId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        {
+          "name": "Create Staff",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Staff\",\n  \"email\": \"{{newStaffEmail}}\",\n  \"phone\": \"0909222333\",\n  \"position\": \"Stylist\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.variables.set(\"newStaffEmail\", \"staff+\" + Date.now() + \"@postman.local\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"staffId\", result.id);",
+                  "  if (result.email) pm.collectionVariables.set(\"staffEmail\", result.email);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Staff With Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff?page=0&size=10&keyword=postman&active=true"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Staff Updated\",\n  \"email\": \"{{staffEmail}}\",\n  \"phone\": \"0909222333\",\n  \"position\": \"Senior Stylist\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Staff Login Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/account",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{staffPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.sendRequest({",
+                  "    url: pm.collectionVariables.get(\"baseUrl\") + \"/api/auth/login\",",
+                  "    method: \"POST\",",
+                  "    header: { \"Content-Type\": \"application/json\" },",
+                  "    body: {",
+                  "      mode: \"raw\",",
+                  "      raw: JSON.stringify({",
+                  "        email: pm.collectionVariables.get(\"staffEmail\"),",
+                  "        password: pm.collectionVariables.get(\"staffPassword\")",
+                  "      })",
+                  "    }",
+                  "  }, (error, response) => {",
+                  "    if (!error && response.code === 200) {",
+                  "      pm.collectionVariables.set(\"staffToken\", response.json().result.token);",
+                  "    }",
+                  "  });",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Staff Services",
+      "item": [
+        {
+          "name": "Assign Service To Staff",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/services/{{serviceId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "List Staff Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/services?page=0&size=10"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Working Hours",
+      "item": [
+        {
+          "name": "Create Working Hour",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/working-hours",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dayOfWeek\": \"MONDAY\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"17:00\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"workingHourId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Working Hours",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/working-hours?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Working Hour",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/working-hours/{{workingHourId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dayOfWeek\": \"MONDAY\",\n  \"startTime\": \"08:00\",\n  \"endTime\": \"17:30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Working Hour Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/working-hours/{{workingHourId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff Time Off",
+      "item": [
+        {
+          "name": "Create Staff Time Off",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/time-off",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{bookingDate}}\",\n  \"startTime\": \"13:00\",\n  \"endTime\": \"14:00\",\n  \"reason\": \"Postman test leave\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"timeOffId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Staff Time Off",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/time-off?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff Time Off",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/time-off/{{timeOffId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{bookingDate}}\",\n  \"startTime\": \"13:30\",\n  \"endTime\": \"14:30\",\n  \"reason\": \"Updated Postman leave\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Business Exceptions",
+      "item": [
+        {
+          "name": "Create Business Exception",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/exceptions",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{exceptionDate}}\",\n  \"type\": \"SPECIAL_CLOSURE\",\n  \"reason\": \"Postman test closure\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"exceptionId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Business Exceptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/exceptions?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Business Exception",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/exceptions/{{exceptionId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{exceptionDate}}\",\n  \"type\": \"HOLIDAY\",\n  \"reason\": \"Updated Postman closure\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/customers",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Customer\",\n  \"phone\": \"{{customerPhone}}\",\n  \"email\": \"postman-customer@example.com\",\n  \"notes\": \"Created from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"customerId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Customers With Search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/customers?page=0&size=10&keyword=postman&active=true"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/customers/{{customerId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Customer Appointment History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/customers/{{customerId}}/appointments?page=0&size=10&fromDate={{bookingDate}}&toDate={{bookingDate}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/customers/{{customerId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Postman Customer Updated\",\n  \"phone\": \"{{customerPhone}}\",\n  \"email\": \"postman-customer@example.com\",\n  \"notes\": \"Updated from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Customer Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/customers/{{customerId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Availability",
+      "item": [
+        {
+          "name": "Get Owner Available Slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/available-slots?serviceId={{serviceId}}&date={{bookingDate}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointments",
+      "item": [
+        {
+          "name": "Create Appointment As Owner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"serviceId\": \"{{serviceId}}\",\n  \"staffId\": \"{{staffId}}\",\n  \"appointmentDate\": \"{{bookingDate}}\",\n  \"startTime\": \"09:00\",\n  \"note\": \"Owner booking from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"appointmentId\", result.id);",
+                  "  if (result.bookingCode) pm.collectionVariables.set(\"bookingCode\", result.bookingCode);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Appointments With Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments?page=0&size=10&status=PENDING&staffId={{staffId}}&customerId={{customerId}}&fromDate={{bookingDate}}&toDate={{bookingDate}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Appointment Detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments/{{appointmentId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Confirm Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments/{{appointmentId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Appointment Notes",
+      "item": [
+        {
+          "name": "Create Appointment Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments/{{appointmentId}}/notes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Owner note created from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"noteId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Appointment Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments/{{appointmentId}}/notes?page=0&size=10"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Appointment Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments/{{appointmentId}}/notes/{{noteId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Owner note updated from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Owner Notifications",
+      "item": [
+        {
+          "name": "List Owner Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/notifications?page=0&size=10"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { const content = pm.response.json().result.content; if (content && content.length) pm.collectionVariables.set(\"notificationId\", content[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Owner Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/notifications/unread-count"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Owner Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/notifications/{{notificationId}}/read"
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Owner Notifications Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/notifications/read-all"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/dashboard?fromDate={{bookingDate}}&toDate={{bookingDate}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Staff Portal",
+      "item": [
+        {
+          "name": "List Assigned Appointments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/appointments?page=0&size=10&fromDate={{bookingDate}}&toDate={{bookingDate}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Assigned Appointment",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/appointments/{{appointmentId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Check In Assigned Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/staff/appointments/{{appointmentId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CHECKED_IN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Staff Appointment Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/staff/appointments/{{appointmentId}}/notes",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Staff note created from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"staffNoteId\", result.id);",
+                  "",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Staff Appointment Notes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/appointments/{{appointmentId}}/notes?page=0&size=10",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Staff Appointment Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/staff/appointments/{{appointmentId}}/notes/{{staffNoteId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Staff note updated from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Staff Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/notifications?page=0&size=10",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) { const content = pm.response.json().result.content; if (content && content.length) pm.collectionVariables.set(\"staffNotificationId\", content[0].id); }"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Staff Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/notifications/unread-count",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Staff Notification Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/notifications/{{staffNotificationId}}/read",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All Staff Notifications Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/notifications/read-all",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{staffToken}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Public Booking",
+      "item": [
+        {
+          "name": "Get Public Business",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/public/businesses/{{slug}}",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public Services",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/public/businesses/{{slug}}/services",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Public Available Slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/public/businesses/{{slug}}/available-slots?serviceId={{serviceId}}&date={{bookingDate}}",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Public Appointment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": "{{baseUrl}}/api/public/businesses/{{slug}}/appointments",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerFullName\": \"Public Postman Customer\",\n  \"customerPhone\": \"{{publicCustomerPhone}}\",\n  \"customerEmail\": \"{{publicCustomerEmail}}\",\n  \"serviceId\": \"{{serviceId}}\",\n  \"staffId\": \"{{staffId}}\",\n  \"appointmentDate\": \"{{bookingDate}}\",\n  \"startTime\": \"10:00\",\n  \"note\": \"Public booking from Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const stamp = Date.now().toString(); pm.variables.set(\"publicCustomerPhone\", \"09\" + stamp.slice(-8)); pm.variables.set(\"publicCustomerEmail\", \"public+\" + stamp + \"@postman.local\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "  const result = pm.response.json().result;",
+                  "  if (result && result.id !== undefined) pm.collectionVariables.set(\"publicAppointmentId\", result.id);",
+                  "  if (result.bookingCode) pm.collectionVariables.set(\"publicBookingCode\", result.bookingCode);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Public Appointment By Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/public/businesses/{{slug}}/appointments/{{publicBookingCode}}",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel Public Appointment",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": "{{baseUrl}}/api/public/businesses/{{slug}}/appointments/{{publicBookingCode}}/cancel",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": []
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      }
+    },
+    {
+      "name": "Cleanup - Run Last",
+      "item": [
+        {
+          "name": "Delete Owner Appointment Note",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/appointments/{{appointmentId}}/notes/{{noteId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Staff Appointment Note",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/staff/appointments/{{appointmentId}}/notes/{{staffNoteId}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staffToken}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Staff Time Off",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/time-off/{{timeOffId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Business Exception",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/exceptions/{{exceptionId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Unassign Service From Staff",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/businesses/{{businessId}}/staff/{{staffId}}/services/{{serviceId}}"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
