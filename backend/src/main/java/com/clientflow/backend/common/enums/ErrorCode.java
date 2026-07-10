@@ -43,7 +43,8 @@ public enum ErrorCode {
     BUSINESS_EXCEPTION_ALREADY_EXISTS(1034, "Business exception already exists on this date", HttpStatus.CONFLICT),
     APPOINTMENT_ON_BUSINESS_EXCEPTION(1035, "Appointment date is closed for this business", HttpStatus.BAD_REQUEST),
     STAFF_INACTIVE(1036, "Staff is inactive", HttpStatus.BAD_REQUEST),
-    CUSTOMER_INACTIVE(1037, "Customer is inactive", HttpStatus.BAD_REQUEST);
+    CUSTOMER_INACTIVE(1037, "Customer is inactive", HttpStatus.BAD_REQUEST),
+    WORKING_HOUR_NOT_FOUND(1038, "Working hour not found", HttpStatus.NOT_FOUND);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

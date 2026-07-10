@@ -4,6 +4,8 @@ import com.clientflow.backend.common.response.ApiResponse;
 import com.clientflow.backend.common.response.PageResponse;
 import com.clientflow.backend.domain.workinghour.dto.WorkingHourCreateRequest;
 import com.clientflow.backend.domain.workinghour.dto.WorkingHourResponse;
+import com.clientflow.backend.domain.workinghour.dto.WorkingHourStatusUpdateRequest;
+import com.clientflow.backend.domain.workinghour.dto.WorkingHourUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +50,34 @@ public class WorkingHourController {
         return ApiResponse.<PageResponse<WorkingHourResponse>>builder()
                 .message("Get working hours successfully")
                 .result(workingHourService.getWorkingHours(businessId, staffId, pageable))
+                .build();
+    }
+
+    @PutMapping("/{workingHourId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<WorkingHourResponse> updateWorkingHour(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @PathVariable Long workingHourId,
+            @Valid @RequestBody WorkingHourUpdateRequest request
+    ) {
+        return ApiResponse.<WorkingHourResponse>builder()
+                .message("Working hour updated successfully")
+                .result(workingHourService.updateWorkingHour(businessId, staffId, workingHourId, request))
+                .build();
+    }
+
+    @PatchMapping("/{workingHourId}/status")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<WorkingHourResponse> updateWorkingHourStatus(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @PathVariable Long workingHourId,
+            @Valid @RequestBody WorkingHourStatusUpdateRequest request
+    ) {
+        return ApiResponse.<WorkingHourResponse>builder()
+                .message("Working hour status updated successfully")
+                .result(workingHourService.updateWorkingHourStatus(businessId, staffId, workingHourId, request))
                 .build();
     }
 }

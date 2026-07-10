@@ -571,6 +571,66 @@ GET /api/businesses/{businessId}/staff/{staffId}/working-hours?page=0&size=10
 Authorization: Bearer <token>
 ```
 
+### Update Working Hour
+
+```http
+PUT /api/businesses/{businessId}/staff/{staffId}/working-hours/{workingHourId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "dayOfWeek": "MONDAY",
+  "startTime": "09:00",
+  "endTime": "18:00"
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "staffId": 1,
+  "dayOfWeek": "MONDAY",
+  "startTime": "09:00:00",
+  "endTime": "18:00:00",
+  "active": true
+}
+```
+
+### Update Working Hour Status
+
+```http
+PATCH /api/businesses/{businessId}/staff/{staffId}/working-hours/{workingHourId}/status
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "active": false
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "staffId": 1,
+  "dayOfWeek": "MONDAY",
+  "startTime": "09:00:00",
+  "endTime": "18:00:00",
+  "active": false
+}
+```
+
 ## Staff Time Off
 
 ### Create Staff Time Off
@@ -1107,6 +1167,7 @@ Important negative tests:
 Duplicate business slug -> Business slug already exists
 Duplicate service name in business -> Service name already exists
 Overlapping working hours -> Working hour overlaps with existing working hour
+Working hour not found -> Working hour not found
 Staff not assigned to service -> Staff is not assigned to this service
 Staff is inactive -> Staff is inactive
 Customer is inactive when owner creates appointment -> Customer is inactive

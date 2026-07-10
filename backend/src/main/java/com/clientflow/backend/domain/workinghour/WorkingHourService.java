@@ -1,6 +1,5 @@
 package com.clientflow.backend.domain.workinghour;
 
-
 import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
 import com.clientflow.backend.common.response.PageResponse;
@@ -10,6 +9,8 @@ import com.clientflow.backend.domain.staff.StaffProfile;
 import com.clientflow.backend.domain.staff.StaffProfileRepository;
 import com.clientflow.backend.domain.workinghour.dto.WorkingHourCreateRequest;
 import com.clientflow.backend.domain.workinghour.dto.WorkingHourResponse;
+import com.clientflow.backend.domain.workinghour.dto.WorkingHourStatusUpdateRequest;
+import com.clientflow.backend.domain.workinghour.dto.WorkingHourUpdateRequest;
 import com.clientflow.backend.domain.workinghour.mapper.WorkingHourMapper;
 import com.clientflow.backend.security.SecurityUtil;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 @Service
@@ -26,7 +28,7 @@ import java.time.LocalTime;
 @RequiredArgsConstructor
 public class WorkingHourService {
     WorkingHourRepository workingHourRepository;
-    WorkingHourMapper  workingHourMapper;
+    WorkingHourMapper workingHourMapper;
     SecurityUtil securityUtil;
     StaffProfileRepository staffProfileRepository;
     BusinessRepository businessRepository;
@@ -38,7 +40,7 @@ public class WorkingHourService {
 
         validateTimeRange(request.startTime(), request.endTime());
 
-        validateNoOverlap(staff, request);
+        validateNoOverlap(staff, request.dayOfWeek(), request.startTime(), request.endTime(), null);
 
         WorkingHour workingHour = workingHourMapper.toEntity(request);
         workingHour.setStaffProfile(staff);
@@ -57,16 +59,76 @@ public class WorkingHourService {
         );
     }
 
+    @Transactional
+    public WorkingHourResponse updateWorkingHour(
+            Long businessId,
+            Long staffId,
+            Long workingHourId,
+            WorkingHourUpdateRequest request
+    ) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        StaffProfile staff = getStaffProfile(business.getId(), staffId);
+        WorkingHour workingHour = getWorkingHour(staff.getId(), workingHourId);
 
-    // newStart < existingEnd && newEnd > existingStart\
-    //cho phép ca liền nhau như 08:00-12:00 và 12:00-17:00, nhưng chặn 08:00-12:00 với 11:00-13:00.
-    private void validateNoOverlap(StaffProfile staffProfile, WorkingHourCreateRequest request) {
+        validateTimeRange(request.startTime(), request.endTime());
+
+        if (workingHour.isActive()) {
+            validateNoOverlap(
+                    staff,
+                    request.dayOfWeek(),
+                    request.startTime(),
+                    request.endTime(),
+                    workingHour.getId()
+            );
+        }
+
+        workingHour.setDayOfWeek(request.dayOfWeek());
+        workingHour.setStartTime(request.startTime());
+        workingHour.setEndTime(request.endTime());
+
+        return workingHourMapper.toResponse(workingHour);
+    }
+
+    @Transactional
+    public WorkingHourResponse updateWorkingHourStatus(
+            Long businessId,
+            Long staffId,
+            Long workingHourId,
+            WorkingHourStatusUpdateRequest request
+    ) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        StaffProfile staff = getStaffProfile(business.getId(), staffId);
+        WorkingHour workingHour = getWorkingHour(staff.getId(), workingHourId);
+
+        if (request.active()) {
+            validateNoOverlap(
+                    staff,
+                    workingHour.getDayOfWeek(),
+                    workingHour.getStartTime(),
+                    workingHour.getEndTime(),
+                    workingHour.getId()
+            );
+        }
+
+        workingHour.setActive(request.active());
+
+        return workingHourMapper.toResponse(workingHour);
+    }
+
+    private void validateNoOverlap(
+            StaffProfile staffProfile,
+            DayOfWeek dayOfWeek,
+            LocalTime startTime,
+            LocalTime endTime,
+            Long excludeWorkingHourId
+    ) {
         boolean hasOverlap = workingHourRepository
-                .findByStaffProfileIdAndDayOfWeekAndActiveTrue(staffProfile.getId(), request.dayOfWeek())
+                .findByStaffProfileIdAndDayOfWeekAndActiveTrue(staffProfile.getId(), dayOfWeek)
                 .stream()
                 .anyMatch(existing ->
-                        request.startTime().isBefore(existing.getEndTime())
-                                && request.endTime().isAfter(existing.getStartTime())
+                        !existing.getId().equals(excludeWorkingHourId)
+                                && startTime.isBefore(existing.getEndTime())
+                                && endTime.isAfter(existing.getStartTime())
                 );
 
         if (hasOverlap) {
@@ -92,5 +154,9 @@ public class WorkingHourService {
                 .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
     }
 
+    private WorkingHour getWorkingHour(Long staffId, Long workingHourId) {
+        return workingHourRepository.findByIdAndStaffProfileId(workingHourId, staffId)
+                .orElseThrow(() -> new AppException(ErrorCode.WORKING_HOUR_NOT_FOUND));
+    }
 
 }
