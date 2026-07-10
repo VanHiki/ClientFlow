@@ -70,6 +70,10 @@ public class AppointmentService {
         StaffProfile staff = staffProfileRepository.findByIdAndBusinessId(request.staffId(), business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
 
+        if (!customer.isActive()) {
+            throw new AppException(ErrorCode.CUSTOMER_INACTIVE);
+        }
+
         if (!service.isActive()) {
             throw new AppException(ErrorCode.SERVICE_INACTIVE);
         }

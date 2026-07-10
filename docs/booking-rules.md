@@ -124,6 +124,10 @@ Public booking request must reject when:
 - Customer phone is invalid or blank.
 - Customer email is provided but invalid.
 
+Special customer matching rule:
+
+- If public booking finds an existing inactive customer by phone, reactivate that customer before creating the appointment.
+
 ## Role Enum
 
 ```text
@@ -178,6 +182,9 @@ MVP only stores notifications in the database. Real email/SMS delivery is not re
 
 - Do not hard-delete services that have appointments.
 - Prefer active=false for services and staff.
+- Prefer active=false for customers instead of hard-delete.
+- Owner-created appointments cannot use inactive customers.
+- Public booking may reactivate an inactive customer matched by phone.
 - Cancelled appointments remain in customer history.
 - NO_SHOW appointments remain in customer history.
 - COMPLETED appointments count toward revenue.

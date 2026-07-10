@@ -140,6 +140,13 @@ public class PublicBookingService {
         String email = normalizeEmail(request.customerEmail());
 
         return customerRepository.findByBusinessIdAndPhone(business.getId(), phone)
+                .map(customer -> {
+                    if (!customer.isActive()) {
+                        customer.setActive(true);
+                    }
+
+                    return customer;
+                })
                 .orElseGet(() -> {
                     if (email != null && customerRepository.existsByBusinessIdAndEmailIgnoreCase(business.getId(), email)) {
                         throw new AppException(ErrorCode.CUSTOMER_EMAIL_ALREADY_EXISTS);

@@ -81,7 +81,7 @@ Backend sẽ thực hiện các bước sau:
 2. Nếu Business không tồn tại hoặc đã bị khóa thì dừng.
 3. Tìm Service theo serviceId và businessId.
 4. Nếu Service không tồn tại hoặc đã bị khóa thì dừng.
-5. Lấy danh sách nhân viên có thể thực hiện dịch vụ.
+5. Lấy danh sách nhân viên đang hoạt động và có thể thực hiện dịch vụ.
 6. Lấy lịch làm việc của từng nhân viên theo đúng thứ trong tuần.
 7. Nếu Business nghỉ vào ngày đó thì không sinh slot.
 8. Loại bỏ khoảng thời gian nhân viên xin nghỉ.
@@ -157,6 +157,11 @@ Từ chối yêu cầu nếu:
 - Số điện thoại không hợp lệ.
 - Email sai định dạng (nếu có).
 
+Quy tắc riêng với khách hàng:
+
+- Nếu owner tạo lịch cho Customer đã bị khóa thì từ chối.
+- Nếu public booking tìm thấy Customer đã bị khóa qua số điện thoại, hệ thống kích hoạt lại Customer đó trước khi tạo lịch.
+
 ---
 
 # 7. Enum Role
@@ -220,7 +225,7 @@ Trong MVP:
 # 11. Quy tắc xóa dữ liệu
 
 - Không xóa cứng Service nếu đã có lịch hẹn.
-- Nên dùng `active = false` để ẩn Service hoặc Staff.
+- Nên dùng `active = false` để ẩn Service, Staff hoặc Customer.
 - Lịch CANCELLED và NO_SHOW vẫn được lưu.
 - Chỉ lịch COMPLETED được tính doanh thu.
 - Lịch CANCELLED không tính doanh thu.
