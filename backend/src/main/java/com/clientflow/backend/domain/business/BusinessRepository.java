@@ -11,6 +11,8 @@ public interface BusinessRepository extends JpaRepository<Business, Long> {
 
     boolean existsBySlug(String slug);
 
+    boolean existsBySlugAndIdNot(String slug, Long id);
+
     Page<Business> findByOwnerId(Long ownerId, Pageable pageable);
 
     Optional<Business> findByIdAndOwnerId(Long id, Long ownerId);

@@ -226,6 +226,72 @@ GET /api/businesses/{businessId}
 Authorization: Bearer <token>
 ```
 
+### Update Business
+
+```http
+PUT /api/businesses/{businessId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "name": "Hiki Salon Updated",
+  "slug": "hiki-salon-updated",
+  "phone": "0909111222",
+  "email": "salon.updated@example.com",
+  "address": "District 1, Ho Chi Minh City"
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "name": "Hiki Salon Updated",
+  "slug": "hiki-salon-updated",
+  "phone": "0909111222",
+  "email": "salon.updated@example.com",
+  "address": "District 1, Ho Chi Minh City",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "active": true
+}
+```
+
+### Update Business Status
+
+```http
+PATCH /api/businesses/{businessId}/status
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "active": false
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "name": "Hiki Salon Updated",
+  "slug": "hiki-salon-updated",
+  "phone": "0909111222",
+  "email": "salon.updated@example.com",
+  "address": "District 1, Ho Chi Minh City",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "active": false
+}
+```
+
 ## Services
 
 ### Create Service

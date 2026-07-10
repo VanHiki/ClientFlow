@@ -3,6 +3,8 @@ package com.clientflow.backend.domain.business;
 import com.clientflow.backend.common.response.ApiResponse;
 import com.clientflow.backend.domain.business.dto.BusinessCreateRequest;
 import com.clientflow.backend.domain.business.dto.BusinessResponse;
+import com.clientflow.backend.domain.business.dto.BusinessStatusUpdateRequest;
+import com.clientflow.backend.domain.business.dto.BusinessUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -12,8 +14,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -54,6 +58,30 @@ public class BusinessController {
         return ApiResponse.<BusinessResponse>builder()
                 .message("Get business successfully")
                 .result(businessService.getMyBusiness(businessId))
+                .build();
+    }
+
+    @PutMapping("/{businessId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<BusinessResponse> updateBusiness(
+            @PathVariable Long businessId,
+            @Valid @RequestBody BusinessUpdateRequest request
+    ) {
+        return ApiResponse.<BusinessResponse>builder()
+                .message("Business updated successfully")
+                .result(businessService.updateBusiness(businessId, request))
+                .build();
+    }
+
+    @PatchMapping("/{businessId}/status")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<BusinessResponse> updateBusinessStatus(
+            @PathVariable Long businessId,
+            @Valid @RequestBody BusinessStatusUpdateRequest request
+    ) {
+        return ApiResponse.<BusinessResponse>builder()
+                .message("Business status updated successfully")
+                .result(businessService.updateBusinessStatus(businessId, request))
                 .build();
     }
 }

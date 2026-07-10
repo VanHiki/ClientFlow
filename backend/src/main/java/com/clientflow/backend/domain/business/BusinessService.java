@@ -4,6 +4,8 @@ import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
 import com.clientflow.backend.domain.business.dto.BusinessCreateRequest;
 import com.clientflow.backend.domain.business.dto.BusinessResponse;
+import com.clientflow.backend.domain.business.dto.BusinessStatusUpdateRequest;
+import com.clientflow.backend.domain.business.dto.BusinessUpdateRequest;
 import com.clientflow.backend.domain.business.mapper.BusinessMapper;
 import com.clientflow.backend.domain.user.User;
 import com.clientflow.backend.security.SecurityUtil;
@@ -55,11 +57,43 @@ public class BusinessService {
 
     @Transactional(readOnly = true)
     public BusinessResponse getMyBusiness(Long businessId) {
-        Long ownerId = securityUtil.getCurrentUserId();
-        Business business = businessRepository.findByIdAndOwnerId(businessId, ownerId)
-                .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
+        Business business = getCurrentOwnerBusiness(businessId);
 
         return businessMapper.toResponse(business);
+    }
+
+    @Transactional
+    public BusinessResponse updateBusiness(Long businessId, BusinessUpdateRequest request) {
+        Business business = getCurrentOwnerBusiness(businessId);
+        String slug = normalizeSlug(request.slug());
+
+        if (businessRepository.existsBySlugAndIdNot(slug, business.getId())) {
+            throw new AppException(ErrorCode.BUSINESS_SLUG_ALREADY_EXISTS);
+        }
+
+        business.setName(request.name().trim());
+        business.setSlug(slug);
+        business.setPhone(normalizeNullable(request.phone()));
+        business.setEmail(normalizeEmail(request.email()));
+        business.setAddress(normalizeNullable(request.address()));
+
+        return businessMapper.toResponse(business);
+    }
+
+    @Transactional
+    public BusinessResponse updateBusinessStatus(Long businessId, BusinessStatusUpdateRequest request) {
+        Business business = getCurrentOwnerBusiness(businessId);
+
+        business.setActive(request.active());
+
+        return businessMapper.toResponse(business);
+    }
+
+    private Business getCurrentOwnerBusiness(Long businessId) {
+        Long ownerId = securityUtil.getCurrentUserId();
+
+        return businessRepository.findByIdAndOwnerId(businessId, ownerId)
+                .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
     }
 
     private String normalizeSlug(String slug) {
