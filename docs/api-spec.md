@@ -151,6 +151,41 @@ Response result:
 }
 ```
 
+### Forgot Password
+
+```http
+POST /api/auth/forgot-password
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "email": "owner@example.com"
+}
+```
+
+The response is identical whether the email exists or not. The raw token is never stored; only its SHA-256 hash is persisted. For local Postman testing only, set `PASSWORD_RESET_EXPOSE_TOKEN=true` before starting the backend to include `result.resetToken` in the response.
+
+### Reset Password
+
+```http
+POST /api/auth/reset-password
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "token": "<raw-reset-token>",
+  "newPassword": "NewPassword@123"
+}
+```
+
+Reset tokens expire after 15 minutes and become invalid immediately after one successful use. Creating a new token invalidates previous unused tokens for the same user.
+
 ## Businesses
 
 ### Create Business

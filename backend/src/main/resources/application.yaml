@@ -29,3 +29,6 @@ clientflow:
   jwt:
     secret: ${JWT_SECRET:clientflow-dev-secret-change-me-32bytes}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:86400}
+  password-reset:
+    expiration-minutes: ${PASSWORD_RESET_EXPIRATION_MINUTES:15}
+    expose-token: ${PASSWORD_RESET_EXPOSE_TOKEN:false}
