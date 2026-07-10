@@ -9,6 +9,7 @@ import com.clientflow.backend.domain.passwordreset.dto.ForgotPasswordRequest;
 import com.clientflow.backend.domain.passwordreset.dto.ForgotPasswordResponse;
 import com.clientflow.backend.domain.passwordreset.dto.ResetPasswordRequest;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@SecurityRequirements
 public class AuthController {
 
     AuthService authService;

@@ -1,5 +1,7 @@
 # ClientFlow API Spec
 
+Interactive documentation is available at `/swagger-ui.html`; the generated OpenAPI document is available at `/v3/api-docs`.
+
 Base URL:
 
 ```text

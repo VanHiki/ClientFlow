@@ -8,6 +8,7 @@ import com.clientflow.backend.domain.publicbooking.dto.PublicAppointmentCreateRe
 import com.clientflow.backend.domain.publicbooking.dto.PublicBusinessResponse;
 import com.clientflow.backend.domain.publicbooking.dto.PublicServiceResponse;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/public/businesses/{slug}")
 @RequiredArgsConstructor
+@SecurityRequirements
 public class PublicBookingController {
 
     private final PublicBookingService publicBookingService;
