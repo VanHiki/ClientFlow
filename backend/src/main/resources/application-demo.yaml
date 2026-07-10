@@ -1,0 +1,6 @@
+clientflow:
+  demo:
+    owner-email: ${DEMO_OWNER_EMAIL:owner@clientflow.local}
+    owner-password: ${DEMO_OWNER_PASSWORD:DemoOwner@123}
+    staff-email: ${DEMO_STAFF_EMAIL:staff@clientflow.local}
+    staff-password: ${DEMO_STAFF_PASSWORD:DemoStaff@123}
