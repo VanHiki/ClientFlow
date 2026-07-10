@@ -11,6 +11,7 @@ import com.clientflow.backend.domain.business.BusinessRepository;
 import com.clientflow.backend.domain.customer.CustomerRepository;
 import com.clientflow.backend.domain.dashboard.dto.DashboardResponse;
 import com.clientflow.backend.domain.dashboard.dto.UpcomingAppointmentResponse;
+import com.clientflow.backend.domain.dashboard.dto.TopServiceResponse;
 import com.clientflow.backend.domain.service.ServiceOfferingRepository;
 import com.clientflow.backend.domain.staff.StaffProfileRepository;
 import com.clientflow.backend.security.SecurityUtil;
@@ -19,8 +20,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -41,10 +44,18 @@ public class DashboardService {
             AppointmentStatus.CHECKED_IN
     );
 
+    private static final List<AppointmentStatus> BOOKED_STATUSES = List.of(
+            AppointmentStatus.PENDING,
+            AppointmentStatus.CONFIRMED,
+            AppointmentStatus.CHECKED_IN,
+            AppointmentStatus.COMPLETED
+    );
+
     @Transactional(readOnly = true)
-    public DashboardResponse getDashboard(Long businessId) {
+    public DashboardResponse getDashboard(Long businessId, LocalDate fromDate, LocalDate toDate) {
         Business business = getCurrentOwnerBusiness(businessId);
         LocalDate today = LocalDate.now(BookingConstants.DEFAULT_ZONE_ID);
+        validateDateRange(fromDate, toDate);
 
         List<UpcomingAppointmentResponse> upcomingAppointments = appointmentRepository
                 .findTop5ByBusinessIdAndAppointmentDateGreaterThanEqualAndStatusInOrderByAppointmentDateAscStartTimeAsc(
@@ -56,17 +67,58 @@ public class DashboardService {
                 .map(this::toUpcomingAppointmentResponse)
                 .toList();
 
+        List<TopServiceResponse> topServices = appointmentRepository.findTopServicesForDashboard(
+                        business.getId(),
+                        BOOKED_STATUSES,
+                        fromDate,
+                        toDate,
+                        PageRequest.of(0, 5)
+                )
+                .stream()
+                .map(projection -> new TopServiceResponse(
+                        projection.getServiceId(),
+                        projection.getServiceName(),
+                        projection.getBookingCount()
+                ))
+                .toList();
+
+        BigDecimal completedRevenue = appointmentRepository.sumRevenueForDashboard(
+                business.getId(),
+                AppointmentStatus.COMPLETED,
+                fromDate,
+                toDate
+        );
+
         return new DashboardResponse(
                 customerRepository.countByBusinessIdAndActiveTrue(business.getId()),
                 serviceOfferingRepository.countByBusinessIdAndActiveTrue(business.getId()),
                 staffProfileRepository.countByBusinessIdAndActiveTrue(business.getId()),
-                appointmentRepository.countByBusinessId(business.getId()),
+                fromDate,
+                toDate,
+                appointmentRepository.countForDashboard(business.getId(), null, fromDate, toDate),
                 appointmentRepository.countByBusinessIdAndAppointmentDate(business.getId(), today),
-                appointmentRepository.countByBusinessIdAndStatus(business.getId(), AppointmentStatus.PENDING),
-                appointmentRepository.countByBusinessIdAndStatus(business.getId(), AppointmentStatus.CONFIRMED),
-                appointmentRepository.countByBusinessIdAndStatus(business.getId(), AppointmentStatus.COMPLETED),
+                appointmentRepository.countForDashboard(
+                        business.getId(), AppointmentStatus.PENDING, fromDate, toDate
+                ),
+                appointmentRepository.countForDashboard(
+                        business.getId(), AppointmentStatus.CONFIRMED, fromDate, toDate
+                ),
+                appointmentRepository.countForDashboard(
+                        business.getId(), AppointmentStatus.COMPLETED, fromDate, toDate
+                ),
+                appointmentRepository.countForDashboard(
+                        business.getId(), AppointmentStatus.CANCELLED, fromDate, toDate
+                ),
+                completedRevenue,
+                topServices,
                 upcomingAppointments
         );
+    }
+
+    private void validateDateRange(LocalDate fromDate, LocalDate toDate) {
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
+        }
     }
 
     private UpcomingAppointmentResponse toUpcomingAppointmentResponse(Appointment appointment) {

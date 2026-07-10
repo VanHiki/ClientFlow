@@ -1,6 +1,7 @@
 package com.clientflow.backend.domain.appointment;
 
 import com.clientflow.backend.common.enums.AppointmentStatus;
+import com.clientflow.backend.domain.dashboard.TopServiceProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -69,6 +71,57 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     long countByBusinessIdAndStatus(Long businessId, AppointmentStatus status);
 
+    @Query("""
+            select count(appointment)
+            from Appointment appointment
+            where appointment.business.id = :businessId
+              and (:status is null or appointment.status = :status)
+              and (:fromDate is null or appointment.appointmentDate >= :fromDate)
+              and (:toDate is null or appointment.appointmentDate <= :toDate)
+            """)
+    long countForDashboard(
+            @Param("businessId") Long businessId,
+            @Param("status") AppointmentStatus status,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    @Query("""
+            select coalesce(sum(appointment.serviceOffering.price), 0)
+            from Appointment appointment
+            where appointment.business.id = :businessId
+              and appointment.status = :status
+              and (:fromDate is null or appointment.appointmentDate >= :fromDate)
+              and (:toDate is null or appointment.appointmentDate <= :toDate)
+            """)
+    BigDecimal sumRevenueForDashboard(
+            @Param("businessId") Long businessId,
+            @Param("status") AppointmentStatus status,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate
+    );
+
+    @Query("""
+            select appointment.serviceOffering.id as serviceId,
+                   appointment.serviceOffering.name as serviceName,
+                   count(appointment) as bookingCount
+            from Appointment appointment
+            where appointment.business.id = :businessId
+              and appointment.status in :statuses
+              and (:fromDate is null or appointment.appointmentDate >= :fromDate)
+              and (:toDate is null or appointment.appointmentDate <= :toDate)
+            group by appointment.serviceOffering.id, appointment.serviceOffering.name
+            order by count(appointment) desc, appointment.serviceOffering.name asc
+            """)
+    List<TopServiceProjection> findTopServicesForDashboard(
+            @Param("businessId") Long businessId,
+            @Param("statuses") Collection<AppointmentStatus> statuses,
+            @Param("fromDate") LocalDate fromDate,
+            @Param("toDate") LocalDate toDate,
+            Pageable pageable
+    );
+
+    @EntityGraph(attributePaths = {"customer", "serviceOffering", "staffProfile"})
     List<Appointment> findTop5ByBusinessIdAndAppointmentDateGreaterThanEqualAndStatusInOrderByAppointmentDateAscStartTimeAsc(
             Long businessId,
             LocalDate appointmentDate,

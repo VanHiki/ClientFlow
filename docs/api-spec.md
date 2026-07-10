@@ -1251,9 +1251,11 @@ Appointment creation notifies the business Owner and the assigned Staff account 
 ### Get Dashboard
 
 ```http
-GET /api/businesses/{businessId}/dashboard
+GET /api/businesses/{businessId}/dashboard?fromDate=2026-07-01&toDate=2026-07-31
 Authorization: Bearer <token>
 ```
+
+Both date filters are optional. Without them, appointment metrics cover the full history.
 
 Response result:
 
@@ -1262,11 +1264,22 @@ Response result:
   "totalCustomers": 3,
   "totalServices": 2,
   "totalStaff": 1,
+  "fromDate": "2026-07-01",
+  "toDate": "2026-07-31",
   "totalAppointments": 5,
   "todayAppointments": 1,
   "pendingAppointments": 2,
   "confirmedAppointments": 1,
   "completedAppointments": 1,
+  "cancelledAppointments": 1,
+  "completedRevenue": 250000.00,
+  "topServices": [
+    {
+      "serviceId": 1,
+      "serviceName": "Hair Cut",
+      "bookingCount": 4
+    }
+  ],
   "upcomingAppointments": [
     {
       "id": 1,
