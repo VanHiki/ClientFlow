@@ -963,7 +963,16 @@ Response result:
 ### List Appointments
 
 ```http
-GET /api/businesses/{businessId}/appointments?page=0&size=10
+GET /api/businesses/{businessId}/appointments?page=0&size=10&status=PENDING&staffId=1&customerId=1&fromDate=2026-07-01&toDate=2026-07-31
+Authorization: Bearer <token>
+```
+
+All filters are optional. `fromDate` must not be after `toDate`.
+
+### Get Appointment Detail
+
+```http
+GET /api/businesses/{businessId}/appointments/{appointmentId}
 Authorization: Bearer <token>
 ```
 

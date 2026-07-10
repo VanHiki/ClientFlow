@@ -29,6 +29,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -112,13 +113,40 @@ public class AppointmentService {
 
 
     @Transactional(readOnly = true)
-    public PageResponse<AppointmentResponse> getAppointments(Long businessId, Pageable pageable) {
+    public PageResponse<AppointmentResponse> getAppointments(
+            Long businessId,
+            AppointmentStatus status,
+            Long staffId,
+            Long customerId,
+            LocalDate fromDate,
+            LocalDate toDate,
+            Pageable pageable
+    ) {
         Business business = getCurrentOwnerBusiness(businessId);
+        validateDateRange(fromDate, toDate);
 
         return PageResponse.from(
-                appointmentRepository.findByBusinessId(business.getId(), pageable)
+                appointmentRepository.search(
+                                business.getId(),
+                                status,
+                                staffId,
+                                customerId,
+                                fromDate,
+                                toDate,
+                                pageable
+                        )
                         .map(appointmentMapper::toResponse)
         );
+    }
+
+    @Transactional(readOnly = true)
+    public AppointmentResponse getAppointment(Long businessId, Long appointmentId) {
+        Business business = getCurrentOwnerBusiness(businessId);
+
+        Appointment appointment = appointmentRepository.findByIdAndBusinessId(appointmentId, business.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
+
+        return appointmentMapper.toResponse(appointment);
     }
 
     @Transactional
@@ -161,6 +189,12 @@ public class AppointmentService {
 
         if (!valid) {
             throw new AppException(ErrorCode.INVALID_APPOINTMENT_STATUS_TRANSITION);
+        }
+    }
+
+    private void validateDateRange(LocalDate fromDate, LocalDate toDate) {
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new AppException(ErrorCode.INVALID_DATE_RANGE);
         }
     }
 
