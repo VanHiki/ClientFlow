@@ -1172,6 +1172,18 @@ DELETE /api/businesses/{businessId}/appointments/{appointmentId}/notes/{noteId}
 Authorization: Bearer <token>
 ```
 
+### Staff Appointment Notes
+
+Staff can list and create notes for assigned appointments. Staff can only update or delete notes they authored.
+
+```http
+GET    /api/staff/appointments/{appointmentId}/notes?page=0&size=10
+POST   /api/staff/appointments/{appointmentId}/notes
+PUT    /api/staff/appointments/{appointmentId}/notes/{noteId}
+DELETE /api/staff/appointments/{appointmentId}/notes/{noteId}
+Authorization: Bearer <staff-token>
+```
+
 ## Dashboard
 
 ### Get Dashboard
