@@ -623,6 +623,68 @@ CANCELLED
 NO_SHOW
 ```
 
+## Appointment Notes
+
+Appointment notes are internal owner notes for an appointment.
+
+### Create Appointment Note
+
+```http
+POST /api/businesses/{businessId}/appointments/{appointmentId}/notes
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "content": "Customer prefers a quiet stylist and short wait time."
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "appointmentId": 1,
+  "authorUserId": 1,
+  "authorName": "Hoang Khanh Van",
+  "content": "Customer prefers a quiet stylist and short wait time.",
+  "createdAt": "2026-07-10T09:30:00"
+}
+```
+
+### List Appointment Notes
+
+```http
+GET /api/businesses/{businessId}/appointments/{appointmentId}/notes?page=0&size=10
+Authorization: Bearer <token>
+```
+
+Response result:
+
+```json
+{
+  "content": [
+    {
+      "id": 1,
+      "appointmentId": 1,
+      "authorUserId": 1,
+      "authorName": "Hoang Khanh Van",
+      "content": "Customer prefers a quiet stylist and short wait time.",
+      "createdAt": "2026-07-10T09:30:00"
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 1,
+  "totalPages": 1,
+  "last": true
+}
+```
+
 ## Dashboard
 
 ### Get Dashboard
@@ -778,9 +840,10 @@ Use this order when testing in Postman:
 8. GET /api/businesses/{businessId}/available-slots
 9. POST /api/public/businesses/{slug}/appointments
 10. PATCH /api/businesses/{businessId}/appointments/{appointmentId}/status
-11. POST /api/businesses/{businessId}/staff/{staffId}/time-off
-12. POST /api/businesses/{businessId}/exceptions
-13. GET /api/businesses/{businessId}/dashboard
+11. POST /api/businesses/{businessId}/appointments/{appointmentId}/notes
+12. POST /api/businesses/{businessId}/staff/{staffId}/time-off
+13. POST /api/businesses/{businessId}/exceptions
+14. GET /api/businesses/{businessId}/dashboard
 ```
 
 Important negative tests:
