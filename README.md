@@ -40,3 +40,7 @@ Demo accounts:
 - Public booking slug: `clientflow-demo`
 
 The `demo` profile is opt-in and skips seeding when that slug already exists. Override credentials with `DEMO_OWNER_EMAIL`, `DEMO_OWNER_PASSWORD`, `DEMO_STAFF_EMAIL`, and `DEMO_STAFF_PASSWORD`.
+
+## Continuous Integration
+
+`.github/workflows/backend-ci.yml` runs the backend test suite with Java 21 and the H2 test profile for every backend push and pull request.
