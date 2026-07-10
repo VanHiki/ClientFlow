@@ -502,6 +502,26 @@ Response result:
 }
 ```
 
+### Create Staff Login Account
+
+The staff profile must have an email and must not already be linked to a user account.
+
+```http
+POST /api/businesses/{businessId}/staff/{staffId}/account
+Authorization: Bearer <owner-token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "password": "Staff@123"
+}
+```
+
+The staff member can then use `POST /api/auth/login` with the profile email and this password. Disabling the staff profile also disables the login account.
+
 ## Staff Services
 
 ### Assign Service To Staff

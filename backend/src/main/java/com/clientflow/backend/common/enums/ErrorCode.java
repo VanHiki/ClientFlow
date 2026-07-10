@@ -47,7 +47,9 @@ public enum ErrorCode {
     WORKING_HOUR_NOT_FOUND(1038, "Working hour not found", HttpStatus.NOT_FOUND),
     STAFF_SERVICE_NOT_FOUND(1039, "Staff service assignment not found", HttpStatus.NOT_FOUND),
     APPOINTMENT_NOTE_NOT_FOUND(1040, "Appointment note not found", HttpStatus.NOT_FOUND),
-    INVALID_DATE_RANGE(1041, "From date must not be after to date", HttpStatus.BAD_REQUEST);
+    INVALID_DATE_RANGE(1041, "From date must not be after to date", HttpStatus.BAD_REQUEST),
+    STAFF_ACCOUNT_ALREADY_EXISTS(1042, "Staff account already exists", HttpStatus.CONFLICT),
+    STAFF_EMAIL_REQUIRED(1043, "Staff email is required for a login account", HttpStatus.BAD_REQUEST);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

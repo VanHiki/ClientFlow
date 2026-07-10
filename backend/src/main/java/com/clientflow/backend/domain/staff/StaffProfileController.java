@@ -3,6 +3,7 @@ package com.clientflow.backend.domain.staff;
 import com.clientflow.backend.common.response.ApiResponse;
 import com.clientflow.backend.common.response.PageResponse;
 import com.clientflow.backend.domain.staff.dto.StaffCreateRequest;
+import com.clientflow.backend.domain.staff.dto.StaffAccountCreateRequest;
 import com.clientflow.backend.domain.staff.dto.StaffResponse;
 import com.clientflow.backend.domain.staff.dto.StaffStatusUpdateRequest;
 import com.clientflow.backend.domain.staff.dto.StaffUpdateRequest;
@@ -82,6 +83,20 @@ public class StaffProfileController {
         return ApiResponse.<StaffResponse>builder()
                 .message("Staff status updated successfully")
                 .result(staffProfileService.updateStaffStatus(businessId, staffId, request))
+                .build();
+    }
+
+    @PostMapping("/{staffId}/account")
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<StaffResponse> createStaffAccount(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @Valid @RequestBody StaffAccountCreateRequest request
+    ) {
+        return ApiResponse.<StaffResponse>builder()
+                .message("Staff login account created successfully")
+                .result(staffProfileService.createStaffAccount(businessId, staffId, request))
                 .build();
     }
 }
