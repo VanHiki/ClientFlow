@@ -50,11 +50,21 @@ public class ServiceOfferingService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<ServiceResponse> getServices(Long businessId, Pageable pageable) {
+    public PageResponse<ServiceResponse> getServices(
+            Long businessId,
+            String keyword,
+            Boolean active,
+            Pageable pageable
+    ) {
         Business business = getCurrentOwnerBusiness(businessId);
 
         return PageResponse.from(
-                serviceOfferingRepository.findByBusinessId(business.getId(), pageable)
+                serviceOfferingRepository.search(
+                                business.getId(),
+                                normalizeNullable(keyword),
+                                active,
+                                pageable
+                        )
                         .map(serviceOfferingMapper::toResponse)
         );
     }

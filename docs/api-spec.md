@@ -366,9 +366,11 @@ Response result:
 ### List Services
 
 ```http
-GET /api/businesses/{businessId}/services?page=0&size=10
+GET /api/businesses/{businessId}/services?page=0&size=10&keyword=hair&active=true
 Authorization: Bearer <token>
 ```
+
+`keyword` searches service name and description. Both filters are optional.
 
 ### Update Service
 
@@ -470,9 +472,11 @@ Response result:
 ### List Staff
 
 ```http
-GET /api/businesses/{businessId}/staff?page=0&size=10
+GET /api/businesses/{businessId}/staff?page=0&size=10&keyword=nguyen&active=true
 Authorization: Bearer <token>
 ```
+
+`keyword` searches staff name, email, phone, and position. Both filters are optional.
 
 ### Update Staff
 

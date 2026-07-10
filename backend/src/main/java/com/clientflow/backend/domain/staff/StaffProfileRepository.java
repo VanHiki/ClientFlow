@@ -14,6 +14,26 @@ public interface StaffProfileRepository extends JpaRepository<StaffProfile, Long
 
     Page<StaffProfile> findByBusinessId(Long businessId, Pageable pageable);
 
+    @Query("""
+            select staff
+            from StaffProfile staff
+            where staff.business.id = :businessId
+              and (:active is null or staff.active = :active)
+              and (
+                    :keyword is null
+                    or lower(staff.fullName) like lower(concat('%', :keyword, '%'))
+                    or lower(coalesce(staff.email, '')) like lower(concat('%', :keyword, '%'))
+                    or staff.phone like concat('%', :keyword, '%')
+                    or lower(coalesce(staff.position, '')) like lower(concat('%', :keyword, '%'))
+              )
+            """)
+    Page<StaffProfile> search(
+            @Param("businessId") Long businessId,
+            @Param("keyword") String keyword,
+            @Param("active") Boolean active,
+            Pageable pageable
+    );
+
     Optional<StaffProfile> findByIdAndBusinessId(Long id, Long businessId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

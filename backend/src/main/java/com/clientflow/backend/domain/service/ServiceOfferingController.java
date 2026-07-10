@@ -42,12 +42,14 @@ public class ServiceOfferingController {
     @PreAuthorize("hasAuthority('ROLE_OWNER')")
     public ApiResponse<PageResponse<ServiceResponse>> getServices(
             @PathVariable Long businessId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
         return ApiResponse.<PageResponse<ServiceResponse>>builder()
                 .message("Get services successfully")
-                .result(serviceOfferingService.getServices(businessId, pageable))
+                .result(serviceOfferingService.getServices(businessId, keyword, active, pageable))
                 .build();
     }
 

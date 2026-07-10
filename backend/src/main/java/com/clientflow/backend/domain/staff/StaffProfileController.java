@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -51,12 +52,14 @@ public class StaffProfileController {
     @PreAuthorize("hasAuthority('ROLE_OWNER')")
     public ApiResponse<PageResponse<StaffResponse>> getStaff(
             @PathVariable Long businessId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean active,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable
     ) {
         return ApiResponse.<PageResponse<StaffResponse>>builder()
                 .message("Get staff successfully")
-                .result(staffProfileService.getStaff(businessId, pageable))
+                .result(staffProfileService.getStaff(businessId, keyword, active, pageable))
                 .build();
     }
 

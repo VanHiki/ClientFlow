@@ -59,11 +59,21 @@ public class StaffProfileService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<StaffResponse> getStaff(Long businessId, Pageable pageable) {
+    public PageResponse<StaffResponse> getStaff(
+            Long businessId,
+            String keyword,
+            Boolean active,
+            Pageable pageable
+    ) {
         Business business = getCurrentOwnerBusiness(businessId);
 
         return PageResponse.from(
-                staffProfileRepository.findByBusinessId(business.getId(), pageable)
+                staffProfileRepository.search(
+                                business.getId(),
+                                normalizeNullable(keyword),
+                                active,
+                                pageable
+                        )
                         .map(staffProfileMapper::toResponse)
         );
     }
