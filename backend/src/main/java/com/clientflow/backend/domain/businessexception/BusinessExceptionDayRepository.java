@@ -13,4 +13,6 @@ public interface BusinessExceptionDayRepository extends JpaRepository<BusinessEx
     Optional<BusinessExceptionDay> findByIdAndBusinessId(Long id, Long businessId);
 
     boolean existsByBusinessIdAndDate(Long businessId, LocalDate date);
+
+    boolean existsByBusinessIdAndDateAndIdNot(Long businessId, LocalDate date, Long id);
 }

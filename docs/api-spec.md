@@ -743,6 +743,33 @@ GET /api/businesses/{businessId}/exceptions?page=0&size=10
 Authorization: Bearer <token>
 ```
 
+### Update Business Exception
+
+```http
+PUT /api/businesses/{businessId}/exceptions/{exceptionId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "date": "2026-07-14",
+  "type": "SPECIAL_CLOSURE",
+  "reason": "Private event"
+}
+```
+
+### Delete Business Exception
+
+```http
+DELETE /api/businesses/{businessId}/exceptions/{exceptionId}
+Authorization: Bearer <token>
+```
+
+Deleting an exception opens the business's slots for that date again. Existing appointments are not deleted.
+
 ## Customers
 
 ### Create Customer
