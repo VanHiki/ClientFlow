@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:clientflow;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_LOWER=TRUE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+
+clientflow:
+  jwt:
+    secret: clientflow-test-secret-change-me-32bytes
+    expiration-seconds: 3600
+  booking:
+    max-bookings-per-hour: 100
+  password-reset:
+    expose-token: true

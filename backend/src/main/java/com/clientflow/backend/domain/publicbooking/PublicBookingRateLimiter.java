@@ -3,6 +3,7 @@ package com.clientflow.backend.domain.publicbooking;
 import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Clock;
@@ -23,6 +24,7 @@ public class PublicBookingRateLimiter {
     private final ConcurrentHashMap<String, BookingWindow> windows = new ConcurrentHashMap<>();
     private final AtomicLong requestCount = new AtomicLong();
 
+    @Autowired
     public PublicBookingRateLimiter(
             @Value("${clientflow.booking.max-bookings-per-hour:3}") int maxBookingsPerHour
     ) {
