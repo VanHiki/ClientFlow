@@ -51,7 +51,8 @@ public enum ErrorCode {
     STAFF_ACCOUNT_ALREADY_EXISTS(1042, "Staff account already exists", HttpStatus.CONFLICT),
     STAFF_EMAIL_REQUIRED(1043, "Staff email is required for a login account", HttpStatus.BAD_REQUEST),
     PUBLIC_CANCELLATION_NOT_ALLOWED(1044, "This appointment cannot be cancelled", HttpStatus.BAD_REQUEST),
-    PUBLIC_CANCELLATION_TOO_LATE(1045, "Appointment cancellation notice is too short", HttpStatus.BAD_REQUEST);
+    PUBLIC_CANCELLATION_TOO_LATE(1045, "Appointment cancellation notice is too short", HttpStatus.BAD_REQUEST),
+    PUBLIC_BOOKING_RATE_LIMITED(1046, "Public booking rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

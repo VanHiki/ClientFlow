@@ -163,6 +163,8 @@ Quy tắc riêng với khách hàng:
 - Nếu public booking tìm thấy Customer đã bị khóa qua số điện thoại, hệ thống kích hoạt lại Customer đó trước khi tạo lịch.
 - Mỗi lịch mới có một booking code công khai và duy nhất.
 - Khách chỉ được tự hủy lịch PENDING hoặc CONFIRMED trước giờ bắt đầu ít nhất 2 giờ.
+- Public booking giới hạn tối đa 3 lần mỗi giờ cho cùng business và số điện thoại.
+- Khi tạo lịch, hệ thống khóa bản ghi staff trong transaction trước khi kiểm tra trùng và lưu appointment.
 
 ---
 

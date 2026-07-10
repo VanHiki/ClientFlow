@@ -129,6 +129,8 @@ Special customer matching rule:
 - If public booking finds an existing inactive customer by phone, reactivate that customer before creating the appointment.
 - Every new appointment receives a unique public booking code.
 - Public cancellation is allowed for PENDING or CONFIRMED appointments at least 2 hours before start time.
+- Public booking allows at most 3 attempts per hour for the same business and customer phone.
+- Appointment creation locks the selected staff row while conflict validation and persistence run in one transaction.
 
 ## Role Enum
 

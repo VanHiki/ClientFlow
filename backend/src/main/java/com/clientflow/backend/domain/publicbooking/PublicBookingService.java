@@ -53,6 +53,7 @@ public class PublicBookingService {
     AppointmentRepository appointmentRepository;
     AppointmentMapper appointmentMapper;
     BookingCodeService bookingCodeService;
+    PublicBookingRateLimiter publicBookingRateLimiter;
 
     @NonFinal
     @Value("${clientflow.booking.cancellation-notice-hours:2}")
@@ -98,15 +99,16 @@ public class PublicBookingService {
 
     @Transactional
     public AppointmentResponse createAppointment(String slug, PublicAppointmentCreateRequest request) {
+        publicBookingRateLimiter.checkAllowed(slug, request.customerPhone());
         Business business = getActiveBusiness(slug);
-
-        Customer customer = findOrCreateCustomer(business, request);
 
         ServiceOffering service = serviceOfferingRepository.findByIdAndBusinessId(request.serviceId(), business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.SERVICE_NOT_FOUND));
 
-        StaffProfile staff = staffProfileRepository.findByIdAndBusinessId(request.staffId(), business.getId())
+        StaffProfile staff = staffProfileRepository.findByIdAndBusinessIdForUpdate(request.staffId(), business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
+
+        Customer customer = findOrCreateCustomer(business, request);
 
         if (!service.isActive()) {
             throw new AppException(ErrorCode.SERVICE_INACTIVE);

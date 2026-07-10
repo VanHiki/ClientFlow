@@ -69,7 +69,7 @@ public class AppointmentService {
         ServiceOffering service = serviceOfferingRepository.findByIdAndBusinessId(request.serviceId(), business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.SERVICE_NOT_FOUND));
 
-        StaffProfile staff = staffProfileRepository.findByIdAndBusinessId(request.staffId(), business.getId())
+        StaffProfile staff = staffProfileRepository.findByIdAndBusinessIdForUpdate(request.staffId(), business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.STAFF_NOT_FOUND));
 
         if (!customer.isActive()) {

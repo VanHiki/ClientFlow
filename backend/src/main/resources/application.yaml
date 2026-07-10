@@ -25,6 +25,7 @@ clientflow:
     timezone: Asia/Ho_Chi_Minh
     slot-step-minutes: 30
     cancellation-notice-hours: ${BOOKING_CANCELLATION_NOTICE_HOURS:2}
+    max-bookings-per-hour: ${PUBLIC_BOOKING_MAX_PER_HOUR:3}
   jwt:
     secret: ${JWT_SECRET:clientflow-dev-secret-change-me-32bytes}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:86400}

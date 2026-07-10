@@ -1340,6 +1340,8 @@ PATCH /api/public/businesses/{slug}/appointments/{bookingCode}/cancel
 
 Only `PENDING` or `CONFIRMED` appointments can be cancelled publicly, and cancellation must happen at least 2 hours before the appointment starts.
 
+Public appointment creation is limited to 3 attempts per hour for the same business slug and customer phone. Exceeding the limit returns HTTP `429` with code `1046`.
+
 ## End-To-End Test Order
 
 Use this order when testing in Postman:
