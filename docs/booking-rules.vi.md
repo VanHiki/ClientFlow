@@ -161,6 +161,8 @@ Quy tắc riêng với khách hàng:
 
 - Nếu owner tạo lịch cho Customer đã bị khóa thì từ chối.
 - Nếu public booking tìm thấy Customer đã bị khóa qua số điện thoại, hệ thống kích hoạt lại Customer đó trước khi tạo lịch.
+- Mỗi lịch mới có một booking code công khai và duy nhất.
+- Khách chỉ được tự hủy lịch PENDING hoặc CONFIRMED trước giờ bắt đầu ít nhất 2 giờ.
 
 ---
 

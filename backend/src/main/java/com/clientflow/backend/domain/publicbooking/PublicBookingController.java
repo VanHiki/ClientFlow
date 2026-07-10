@@ -62,4 +62,26 @@ public class PublicBookingController {
                 .result(publicBookingService.createAppointment(slug, request))
                 .build();
     }
+
+    @GetMapping("/appointments/{bookingCode}")
+    public ApiResponse<AppointmentResponse> getAppointment(
+            @PathVariable String slug,
+            @PathVariable String bookingCode
+    ) {
+        return ApiResponse.<AppointmentResponse>builder()
+                .message("Get public appointment successfully")
+                .result(publicBookingService.getAppointment(slug, bookingCode))
+                .build();
+    }
+
+    @PatchMapping("/appointments/{bookingCode}/cancel")
+    public ApiResponse<AppointmentResponse> cancelAppointment(
+            @PathVariable String slug,
+            @PathVariable String bookingCode
+    ) {
+        return ApiResponse.<AppointmentResponse>builder()
+                .message("Appointment cancelled successfully")
+                .result(publicBookingService.cancelAppointment(slug, bookingCode))
+                .build();
+    }
 }

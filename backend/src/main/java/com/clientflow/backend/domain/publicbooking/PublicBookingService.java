@@ -6,6 +6,8 @@ import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
 import com.clientflow.backend.domain.appointment.Appointment;
 import com.clientflow.backend.domain.appointment.AppointmentRepository;
+import com.clientflow.backend.domain.appointment.AppointmentStatusTransitionPolicy;
+import com.clientflow.backend.domain.appointment.BookingCodeService;
 import com.clientflow.backend.domain.appointment.dto.AppointmentResponse;
 import com.clientflow.backend.domain.appointment.mapper.AppointmentMapper;
 import com.clientflow.backend.domain.business.Business;
@@ -26,6 +28,8 @@ import com.clientflow.backend.domain.workinghour.WorkingHourRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +52,11 @@ public class PublicBookingService {
     BusinessExceptionDayRepository businessExceptionDayRepository;
     AppointmentRepository appointmentRepository;
     AppointmentMapper appointmentMapper;
+    BookingCodeService bookingCodeService;
+
+    @NonFinal
+    @Value("${clientflow.booking.cancellation-notice-hours:2}")
+    long cancellationNoticeHours;
 
     private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
             AppointmentStatus.PENDING,
@@ -120,6 +129,7 @@ public class PublicBookingService {
         validateNoOverlap(staff, request, endTime);
 
         Appointment appointment = Appointment.builder()
+                .bookingCode(bookingCodeService.generate(request.appointmentDate()))
                 .business(business)
                 .customer(customer)
                 .serviceOffering(service)
@@ -133,6 +143,41 @@ public class PublicBookingService {
                 .build();
 
         return appointmentMapper.toResponse(appointmentRepository.save(appointment));
+    }
+
+    @Transactional(readOnly = true)
+    public AppointmentResponse getAppointment(String slug, String bookingCode) {
+        Business business = findBusinessBySlug(slug);
+        Appointment appointment = getAppointmentByCode(business.getId(), bookingCode);
+
+        return appointmentMapper.toResponse(appointment);
+    }
+
+    @Transactional
+    public AppointmentResponse cancelAppointment(String slug, String bookingCode) {
+        Business business = findBusinessBySlug(slug);
+        Appointment appointment = getAppointmentByCode(business.getId(), bookingCode);
+
+        if (appointment.getStatus() != AppointmentStatus.PENDING
+                && appointment.getStatus() != AppointmentStatus.CONFIRMED) {
+            throw new AppException(ErrorCode.PUBLIC_CANCELLATION_NOT_ALLOWED);
+        }
+
+        LocalDateTime appointmentStart = LocalDateTime.of(
+                appointment.getAppointmentDate(),
+                appointment.getStartTime()
+        );
+        LocalDateTime cancellationDeadline = appointmentStart.minusHours(cancellationNoticeHours);
+        LocalDateTime now = LocalDateTime.now(BookingConstants.DEFAULT_ZONE_ID);
+
+        if (now.isAfter(cancellationDeadline)) {
+            throw new AppException(ErrorCode.PUBLIC_CANCELLATION_TOO_LATE);
+        }
+
+        AppointmentStatusTransitionPolicy.validate(appointment.getStatus(), AppointmentStatus.CANCELLED);
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+
+        return appointmentMapper.toResponse(appointment);
     }
 
     private Customer findOrCreateCustomer(Business business, PublicAppointmentCreateRequest request) {
@@ -240,14 +285,26 @@ public class PublicBookingService {
     }
 
     private Business getActiveBusiness(String slug) {
-        Business business = businessRepository.findBySlug(slug)
-                .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
+        Business business = findBusinessBySlug(slug);
 
         if (!business.isActive()) {
             throw new AppException(ErrorCode.BUSINESS_NOT_FOUND);
         }
 
         return business;
+    }
+
+    private Business findBusinessBySlug(String slug) {
+        return businessRepository.findBySlug(slug)
+                .orElseThrow(() -> new AppException(ErrorCode.BUSINESS_NOT_FOUND));
+    }
+
+    private Appointment getAppointmentByCode(Long businessId, String bookingCode) {
+        return appointmentRepository.findByBusinessIdAndBookingCode(
+                        businessId,
+                        bookingCode.trim().toUpperCase()
+                )
+                .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
     }
 
     private String normalizeEmail(String email) {

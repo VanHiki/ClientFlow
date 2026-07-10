@@ -48,6 +48,7 @@ public class AppointmentService {
     StaffTimeOffRepository staffTimeOffRepository;
     BusinessExceptionDayRepository businessExceptionDayRepository;
     AppointmentMapper appointmentMapper;
+    BookingCodeService bookingCodeService;
     SecurityUtil securityUtil;
 
     private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
@@ -96,6 +97,7 @@ public class AppointmentService {
         validateNoOverlap(staff, request, endTime);
 
         Appointment appointment = Appointment.builder()
+                .bookingCode(bookingCodeService.generate(request.appointmentDate()))
                 .business(business)
                 .customer(customer)
                 .serviceOffering(service)

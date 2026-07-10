@@ -22,13 +22,17 @@ import java.time.LocalTime;
 @Table(name = "appointments", indexes = {
         @Index(name = "idx_appointments_business_date", columnList = "business_id, appointment_date"),
         @Index(name = "idx_appointments_staff_date", columnList = "staff_profile_id, appointment_date"),
-        @Index(name = "idx_appointments_customer_id", columnList = "customer_id")
+        @Index(name = "idx_appointments_customer_id", columnList = "customer_id"),
+        @Index(name = "idx_appointments_booking_code", columnList = "booking_code", unique = true)
 })
 public class Appointment extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "booking_code", unique = true, length = 40)
+    private String bookingCode;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "business_id", nullable = false)

@@ -127,6 +127,8 @@ Public booking request must reject when:
 Special customer matching rule:
 
 - If public booking finds an existing inactive customer by phone, reactivate that customer before creating the appointment.
+- Every new appointment receives a unique public booking code.
+- Public cancellation is allowed for PENDING or CONFIRMED appointments at least 2 hours before start time.
 
 ## Role Enum
 

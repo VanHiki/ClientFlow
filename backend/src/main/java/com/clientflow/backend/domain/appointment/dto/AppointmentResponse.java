@@ -7,6 +7,7 @@ import java.time.LocalTime;
 
 public record AppointmentResponse(
         Long id,
+        String bookingCode,
         Long businessId,
         Long customerId,
         Long serviceId,

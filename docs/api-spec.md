@@ -985,6 +985,7 @@ Response result:
 ```json
 {
   "id": 1,
+  "bookingCode": "CF-20260713-8X92JKP3TM",
   "businessId": 1,
   "customerId": 1,
   "serviceId": 1,
@@ -1311,6 +1312,7 @@ Response result:
 ```json
 {
   "id": 1,
+  "bookingCode": "CF-20260713-8X92JKP3TM",
   "businessId": 1,
   "customerId": 1,
   "serviceId": 1,
@@ -1323,6 +1325,20 @@ Response result:
   "note": "Public booking"
 }
 ```
+
+### Public Get Appointment By Booking Code
+
+```http
+GET /api/public/businesses/{slug}/appointments/{bookingCode}
+```
+
+### Public Cancel Appointment
+
+```http
+PATCH /api/public/businesses/{slug}/appointments/{bookingCode}/cancel
+```
+
+Only `PENDING` or `CONFIRMED` appointments can be cancelled publicly, and cancellation must happen at least 2 hours before the appointment starts.
 
 ## End-To-End Test Order
 
