@@ -103,6 +103,10 @@ public class PublicBookingService {
             throw new AppException(ErrorCode.SERVICE_INACTIVE);
         }
 
+        if (!staff.isActive()) {
+            throw new AppException(ErrorCode.STAFF_INACTIVE);
+        }
+
         if (!staffServiceAssignmentRepository.existsByStaffProfileIdAndServiceOfferingId(staff.getId(), service.getId())) {
             throw new AppException(ErrorCode.STAFF_NOT_ASSIGNED_TO_SERVICE);
         }

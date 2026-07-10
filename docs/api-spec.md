@@ -371,6 +371,71 @@ GET /api/businesses/{businessId}/staff?page=0&size=10
 Authorization: Bearer <token>
 ```
 
+### Update Staff
+
+```http
+PUT /api/businesses/{businessId}/staff/{staffId}
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "fullName": "Nguyen Van A Updated",
+  "email": "staff.updated@example.com",
+  "phone": "0909000011",
+  "position": "Senior hair stylist"
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "businessId": 1,
+  "userId": null,
+  "fullName": "Nguyen Van A Updated",
+  "email": "staff.updated@example.com",
+  "phone": "0909000011",
+  "position": "Senior hair stylist",
+  "active": true
+}
+```
+
+### Update Staff Status
+
+```http
+PATCH /api/businesses/{businessId}/staff/{staffId}/status
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+Request:
+
+```json
+{
+  "active": false
+}
+```
+
+Response result:
+
+```json
+{
+  "id": 1,
+  "businessId": 1,
+  "userId": null,
+  "fullName": "Nguyen Van A Updated",
+  "email": "staff.updated@example.com",
+  "phone": "0909000011",
+  "position": "Senior hair stylist",
+  "active": false
+}
+```
+
 ## Staff Services
 
 ### Assign Service To Staff
@@ -914,6 +979,7 @@ Duplicate business slug -> Business slug already exists
 Duplicate service name in business -> Service name already exists
 Overlapping working hours -> Working hour overlaps with existing working hour
 Staff not assigned to service -> Staff is not assigned to this service
+Staff is inactive -> Staff is inactive
 Appointment in the past -> Cannot book appointment in the past
 Appointment outside working hours -> Appointment is outside staff working hours
 Appointment overlaps another blocking appointment -> Staff already has an appointment in this time range

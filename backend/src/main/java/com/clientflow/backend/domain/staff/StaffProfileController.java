@@ -4,6 +4,8 @@ import com.clientflow.backend.common.response.ApiResponse;
 import com.clientflow.backend.common.response.PageResponse;
 import com.clientflow.backend.domain.staff.dto.StaffCreateRequest;
 import com.clientflow.backend.domain.staff.dto.StaffResponse;
+import com.clientflow.backend.domain.staff.dto.StaffStatusUpdateRequest;
+import com.clientflow.backend.domain.staff.dto.StaffUpdateRequest;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,8 +16,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -52,6 +56,32 @@ public class StaffProfileController {
         return ApiResponse.<PageResponse<StaffResponse>>builder()
                 .message("Get staff successfully")
                 .result(staffProfileService.getStaff(businessId, pageable))
+                .build();
+    }
+
+    @PutMapping("/{staffId}")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<StaffResponse> updateStaff(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @Valid @RequestBody StaffUpdateRequest request
+    ) {
+        return ApiResponse.<StaffResponse>builder()
+                .message("Staff updated successfully")
+                .result(staffProfileService.updateStaff(businessId, staffId, request))
+                .build();
+    }
+
+    @PatchMapping("/{staffId}/status")
+    @PreAuthorize("hasAuthority('ROLE_OWNER')")
+    public ApiResponse<StaffResponse> updateStaffStatus(
+            @PathVariable Long businessId,
+            @PathVariable Long staffId,
+            @Valid @RequestBody StaffStatusUpdateRequest request
+    ) {
+        return ApiResponse.<StaffResponse>builder()
+                .message("Staff status updated successfully")
+                .result(staffProfileService.updateStaffStatus(businessId, staffId, request))
                 .build();
     }
 }

@@ -99,6 +99,10 @@ public class AvailabilityService {
         for (StaffServiceAssignment assignment : assignments) {
             StaffProfile staff = assignment.getStaffProfile();
 
+            if (!staff.isActive()) {
+                continue;
+            }
+
             List<WorkingHour> workingHours =
                     workingHourRepository.findByStaffProfileIdAndDayOfWeekAndActiveTrue(
                             staff.getId(),
