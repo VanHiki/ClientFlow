@@ -1185,6 +1185,32 @@ DELETE /api/staff/appointments/{appointmentId}/notes/{noteId}
 Authorization: Bearer <staff-token>
 ```
 
+## Notifications
+
+Notification records are stored in the database. Email and SMS delivery are outside the MVP.
+
+Owner endpoints:
+
+```http
+GET   /api/businesses/{businessId}/notifications?page=0&size=10
+GET   /api/businesses/{businessId}/notifications/unread-count
+PATCH /api/businesses/{businessId}/notifications/{notificationId}/read
+PATCH /api/businesses/{businessId}/notifications/read-all
+Authorization: Bearer <owner-token>
+```
+
+Staff endpoints:
+
+```http
+GET   /api/staff/notifications?page=0&size=10
+GET   /api/staff/notifications/unread-count
+PATCH /api/staff/notifications/{notificationId}/read
+PATCH /api/staff/notifications/read-all
+Authorization: Bearer <staff-token>
+```
+
+Appointment creation notifies the business Owner and the assigned Staff account when available. Status notifications are created for `CONFIRMED`, `CANCELLED`, and `COMPLETED`.
+
 ## Dashboard
 
 ### Get Dashboard

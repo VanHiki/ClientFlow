@@ -52,7 +52,8 @@ public enum ErrorCode {
     STAFF_EMAIL_REQUIRED(1043, "Staff email is required for a login account", HttpStatus.BAD_REQUEST),
     PUBLIC_CANCELLATION_NOT_ALLOWED(1044, "This appointment cannot be cancelled", HttpStatus.BAD_REQUEST),
     PUBLIC_CANCELLATION_TOO_LATE(1045, "Appointment cancellation notice is too short", HttpStatus.BAD_REQUEST),
-    PUBLIC_BOOKING_RATE_LIMITED(1046, "Public booking rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS);
+    PUBLIC_BOOKING_RATE_LIMITED(1046, "Public booking rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS),
+    NOTIFICATION_NOT_FOUND(1047, "Notification not found", HttpStatus.NOT_FOUND);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

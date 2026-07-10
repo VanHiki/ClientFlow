@@ -21,6 +21,7 @@ import com.clientflow.backend.domain.staff.StaffProfileRepository;
 import com.clientflow.backend.domain.staffservice.StaffServiceAssignmentRepository;
 import com.clientflow.backend.domain.stafftimeoff.StaffTimeOffRepository;
 import com.clientflow.backend.domain.workinghour.WorkingHourRepository;
+import com.clientflow.backend.domain.notification.NotificationService;
 import com.clientflow.backend.security.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class AppointmentService {
     BusinessExceptionDayRepository businessExceptionDayRepository;
     AppointmentMapper appointmentMapper;
     BookingCodeService bookingCodeService;
+    NotificationService notificationService;
     SecurityUtil securityUtil;
 
     private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
@@ -110,7 +112,10 @@ public class AppointmentService {
                 .note(normalizeNullable(request.note()))
                 .build();
 
-        return appointmentMapper.toResponse(appointmentRepository.save(appointment));
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        notificationService.recordAppointmentCreated(savedAppointment);
+
+        return appointmentMapper.toResponse(savedAppointment);
     }
 
 
@@ -162,9 +167,14 @@ public class AppointmentService {
         Appointment appointment = appointmentRepository.findByIdAndBusinessId(appointmentId, business.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.APPOINTMENT_NOT_FOUND));
 
-        AppointmentStatusTransitionPolicy.validate(appointment.getStatus(), request.status());
+        AppointmentStatus currentStatus = appointment.getStatus();
+        AppointmentStatusTransitionPolicy.validate(currentStatus, request.status());
 
         appointment.setStatus(request.status());
+
+        if (currentStatus != request.status()) {
+            notificationService.recordAppointmentStatusChanged(appointment);
+        }
 
         return appointmentMapper.toResponse(appointment);
     }

@@ -25,6 +25,7 @@ import com.clientflow.backend.domain.staff.StaffProfileRepository;
 import com.clientflow.backend.domain.staffservice.StaffServiceAssignmentRepository;
 import com.clientflow.backend.domain.stafftimeoff.StaffTimeOffRepository;
 import com.clientflow.backend.domain.workinghour.WorkingHourRepository;
+import com.clientflow.backend.domain.notification.NotificationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -54,6 +55,7 @@ public class PublicBookingService {
     AppointmentMapper appointmentMapper;
     BookingCodeService bookingCodeService;
     PublicBookingRateLimiter publicBookingRateLimiter;
+    NotificationService notificationService;
 
     @NonFinal
     @Value("${clientflow.booking.cancellation-notice-hours:2}")
@@ -144,7 +146,10 @@ public class PublicBookingService {
                 .note(normalizeNullable(request.note()))
                 .build();
 
-        return appointmentMapper.toResponse(appointmentRepository.save(appointment));
+        Appointment savedAppointment = appointmentRepository.save(appointment);
+        notificationService.recordAppointmentCreated(savedAppointment);
+
+        return appointmentMapper.toResponse(savedAppointment);
     }
 
     @Transactional(readOnly = true)
@@ -178,6 +183,7 @@ public class PublicBookingService {
 
         AppointmentStatusTransitionPolicy.validate(appointment.getStatus(), AppointmentStatus.CANCELLED);
         appointment.setStatus(AppointmentStatus.CANCELLED);
+        notificationService.recordAppointmentStatusChanged(appointment);
 
         return appointmentMapper.toResponse(appointment);
     }

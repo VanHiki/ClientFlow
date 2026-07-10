@@ -9,6 +9,7 @@ import com.clientflow.backend.domain.appointment.dto.AppointmentStatusUpdateRequ
 import com.clientflow.backend.domain.appointment.mapper.AppointmentMapper;
 import com.clientflow.backend.domain.staff.StaffProfile;
 import com.clientflow.backend.domain.staff.StaffProfileRepository;
+import com.clientflow.backend.domain.notification.NotificationService;
 import com.clientflow.backend.security.SecurityUtil;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class StaffAppointmentService {
     AppointmentRepository appointmentRepository;
     StaffProfileRepository staffProfileRepository;
     AppointmentMapper appointmentMapper;
+    NotificationService notificationService;
     SecurityUtil securityUtil;
 
     @Transactional(readOnly = true)
@@ -69,8 +71,13 @@ public class StaffAppointmentService {
         StaffProfile staff = getCurrentStaff();
         Appointment appointment = getAssignedAppointment(staff.getId(), appointmentId);
 
-        AppointmentStatusTransitionPolicy.validate(appointment.getStatus(), request.status());
+        AppointmentStatus currentStatus = appointment.getStatus();
+        AppointmentStatusTransitionPolicy.validate(currentStatus, request.status());
         appointment.setStatus(request.status());
+
+        if (currentStatus != request.status()) {
+            notificationService.recordAppointmentStatusChanged(appointment);
+        }
 
         return appointmentMapper.toResponse(appointment);
     }
