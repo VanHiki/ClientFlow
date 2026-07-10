@@ -1,7 +1,6 @@
 package com.clientflow.backend.domain.availability;
 
 import com.clientflow.backend.common.BookingConstants;
-import com.clientflow.backend.common.enums.AppointmentStatus;
 import com.clientflow.backend.common.enums.ErrorCode;
 import com.clientflow.backend.common.exception.AppException;
 import com.clientflow.backend.domain.appointment.Appointment;
@@ -45,13 +44,6 @@ public class AvailabilityService {
     StaffTimeOffRepository staffTimeOffRepository;
     BusinessExceptionDayRepository businessExceptionDayRepository;
     SecurityUtil securityUtil;
-
-    private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
-            AppointmentStatus.PENDING,
-            AppointmentStatus.CONFIRMED,
-            AppointmentStatus.CHECKED_IN,
-            AppointmentStatus.COMPLETED
-    );
 
     @Transactional(readOnly = true)
     public List<AvailableSlotResponse> getPublicAvailableSlots(String slug, Long serviceId, LocalDate date) {
@@ -113,7 +105,7 @@ public class AvailabilityService {
                     appointmentRepository.findByStaffProfileIdAndAppointmentDateAndStatusIn(
                             staff.getId(),
                             date,
-                            BLOCKING_STATUSES
+                            BookingConstants.BLOCKING_APPOINTMENT_STATUSES
                     );
 
             List<StaffTimeOff> timeOffs =

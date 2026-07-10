@@ -27,7 +27,7 @@
 | PENDING | Khách vừa tạo lịch, đang chờ xác nhận | Có |
 | CONFIRMED | Lịch đã được xác nhận | Có |
 | CHECKED_IN | Khách đã đến | Có |
-| COMPLETED | Đã hoàn thành dịch vụ | Không |
+| COMPLETED | Đã hoàn thành dịch vụ | Có, trong đúng khoảng thời gian đã lưu |
 | CANCELLED | Khách hủy lịch | Không |
 | NO_SHOW | Khách không đến | Không |
 
@@ -51,6 +51,8 @@ Ngoài ra còn cho phép:
 PENDING → CANCELLED
 
 CONFIRMED → CANCELLED
+
+CONFIRMED → COMPLETED
 
 CONFIRMED → NO_SHOW
 
@@ -103,6 +105,7 @@ Hai lịch được xem là trùng khi:
     - PENDING
     - CONFIRMED
     - CHECKED_IN
+    - COMPLETED
 - Khoảng thời gian giao nhau.
 
 Điều kiện:

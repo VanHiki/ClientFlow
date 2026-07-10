@@ -33,7 +33,7 @@ NO_SHOW
 | PENDING | Booking has been created and is waiting for owner/staff confirmation | Yes |
 | CONFIRMED | Booking is accepted | Yes |
 | CHECKED_IN | Customer has arrived | Yes |
-| COMPLETED | Service has been completed | No for future slot generation |
+| COMPLETED | Service has been completed | Yes for the recorded time range |
 | CANCELLED | Booking has been cancelled | No |
 | NO_SHOW | Customer did not arrive | No |
 
@@ -44,6 +44,7 @@ PENDING -> CONFIRMED
 PENDING -> CANCELLED
 
 CONFIRMED -> CHECKED_IN
+CONFIRMED -> COMPLETED
 CONFIRMED -> CANCELLED
 CONFIRMED -> NO_SHOW
 
@@ -86,7 +87,7 @@ Two appointments conflict when all conditions are true:
 ```text
 same staff_id
 same appointment_date
-existing status in PENDING, CONFIRMED, CHECKED_IN
+existing status in PENDING, CONFIRMED, CHECKED_IN, COMPLETED
 new_start < existing_end
 new_end > existing_start
 ```

@@ -61,13 +61,6 @@ public class PublicBookingService {
     @Value("${clientflow.booking.cancellation-notice-hours:2}")
     long cancellationNoticeHours;
 
-    private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
-            AppointmentStatus.PENDING,
-            AppointmentStatus.CONFIRMED,
-            AppointmentStatus.CHECKED_IN,
-            AppointmentStatus.COMPLETED
-    );
-
     @Transactional(readOnly = true)
     public PublicBusinessResponse getBusiness(String slug) {
         Business business = getActiveBusiness(slug);
@@ -282,7 +275,7 @@ public class PublicBookingService {
                 .existsByStaffProfileIdAndAppointmentDateAndStatusInAndStartTimeLessThanAndEndTimeGreaterThan(
                         staff.getId(),
                         request.appointmentDate(),
-                        BLOCKING_STATUSES,
+                        BookingConstants.BLOCKING_APPOINTMENT_STATUSES,
                         endTime,
                         request.startTime()
                 );

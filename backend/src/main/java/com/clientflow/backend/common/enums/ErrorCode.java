@@ -54,7 +54,9 @@ public enum ErrorCode {
     PUBLIC_CANCELLATION_TOO_LATE(1045, "Appointment cancellation notice is too short", HttpStatus.BAD_REQUEST),
     PUBLIC_BOOKING_RATE_LIMITED(1046, "Public booking rate limit exceeded", HttpStatus.TOO_MANY_REQUESTS),
     NOTIFICATION_NOT_FOUND(1047, "Notification not found", HttpStatus.NOT_FOUND),
-    INVALID_PASSWORD_RESET_TOKEN(1048, "Password reset token is invalid or expired", HttpStatus.BAD_REQUEST);
+    INVALID_PASSWORD_RESET_TOKEN(1048, "Password reset token is invalid or expired", HttpStatus.BAD_REQUEST),
+    FORBIDDEN(1049, "Access denied", HttpStatus.FORBIDDEN),
+    DATA_CONFLICT(1050, "Data conflict", HttpStatus.CONFLICT);
     private final int code;
     private final String message;
     private final HttpStatus httpStatus;

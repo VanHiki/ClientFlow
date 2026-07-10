@@ -33,7 +33,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,14 +51,6 @@ public class AppointmentService {
     BookingCodeService bookingCodeService;
     NotificationService notificationService;
     SecurityUtil securityUtil;
-
-    private static final List<AppointmentStatus> BLOCKING_STATUSES = List.of(
-            AppointmentStatus.PENDING,
-            AppointmentStatus.CONFIRMED,
-            AppointmentStatus.CHECKED_IN,
-            AppointmentStatus.COMPLETED
-    );
-
 
     @Transactional
     public AppointmentResponse createAppointment(Long businessId, AppointmentCreateRequest request) {
@@ -209,7 +200,7 @@ public class AppointmentService {
                 .existsByStaffProfileIdAndAppointmentDateAndStatusInAndStartTimeLessThanAndEndTimeGreaterThan(
                         staff.getId(),
                         request.appointmentDate(),
-                        BLOCKING_STATUSES,
+                        BookingConstants.BLOCKING_APPOINTMENT_STATUSES,
                         endTime,
                         request.startTime()
                 );
